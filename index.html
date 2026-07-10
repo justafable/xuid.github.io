@@ -634,7 +634,7 @@
       }
   };
 
-  // --- FIXED REVERSE LOOKUP ---
+  // --- FULLY FIXED REVERSE LOOKUP ---
   window.__REVERSE_LOOKUP__ = async () => {
       const _in = document.getElementById('reverse-input').value.trim();
       const _res = document.getElementById('reverse-result');
@@ -647,7 +647,7 @@
       } else if (/^[0-9A-Fa-f]{16}$/.test(_in)) {
           _x = BigInt('0x' + _in).toString(); // Hex XUID
       } else if (/^00000000-0000-0000-([0-9A-Fa-f]{4})-([0-9A-Fa-f]{12})$/i.test(_in)) {
-          // Fixed: extract FULL 16 hex characters from Floodgate UUID
+          // Fixed: extract full 16 hex characters from Floodgate UUID
           const hexPart = _in.replace(/-/g, '').slice(-16);
           _x = BigInt('0x' + hexPart).toString();
       } else {
@@ -660,14 +660,16 @@
       _txt.innerHTML = '🔄 Searching...', _res.style.display = 'block';
 
       try {
-          // ✅ Using working reverse API (GeyserMC reverse endpoint is broken/unavailable)
-          const _r = await fetch(`https://xuidresolver.com/api/xuid/${_x}`);
+          // ✅ Uses CORS proxy to avoid "Failed to fetch" errors
+          const apiUrl = `https://corsproxy.io/?https%3A%2F%2Fxuidresolver.com%2Fapi%2Fxuid%2F${encodeURIComponent(_x)}`;
+          const _r = await fetch(apiUrl, { cache: 'no-store' });
+          
           if (!_r.ok) throw new Error(`Server returned ${_r.status}`);
           
           const _d = await _r.json();
-          const gamertag = _d?.gamertag || _d?.name || 'Unknown';
+          const gamertag = _d?.gamertag || _d?.name || null;
 
-          if (gamertag && gamertag !== 'Unknown') {
+          if (gamertag) {
               const _h = BigInt(_x).toString(16).toUpperCase().padStart(16, '0');
               const _u = `00000000-0000-0000-${_h.slice(0,4)}-${_h.slice(4)}`.toLowerCase();
 
@@ -681,8 +683,31 @@
               _res.className = 'result error';
           }
       } catch (err) {
-          _txt.innerHTML = `❌ Lookup failed: ${err.message}`;
-          _res.className = 'result error';
+          // Fallback if first API fails
+          try {
+              _txt.innerHTML = '🔄 Trying alternative source...';
+              const altUrl = `https://corsproxy.io/?https%3A%2F%2Fapi.xboxleaders.com%2Fapi%2Fxuid%2F${encodeURIComponent(_x)}`;
+              const altRes = await fetch(altUrl, { cache: 'no-store' });
+              if (!altRes.ok) throw new Error('Alternative also failed');
+              
+              const altData = await altRes.json();
+              const gamertag = altData?.gamertag || altData?.profile?.gamertag;
+              
+              if (gamertag) {
+                  const _h = BigInt(_x).toString(16).toUpperCase().padStart(16, '0');
+                  const _u = `00000000-0000-0000-${_h.slice(0,4)}-${_h.slice(4)}`.toLowerCase();
+                  _txt.innerHTML = `<span class="label">Gamertag</span><div class="value">${gamertag}<button class="copy-btn" onclick="navigator.clipboard.writeText('${gamertag}');showCopy('Copied!')">Copy</button></div>
+                  <span class="label">Decimal XUID</span><div class="value">${_x}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_x}');showCopy('Copied!')">Copy</button></div>
+                  <span class="label">Hex XUID</span><div class="value">${_h}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_h}');showCopy('Copied!')">Copy</button></div>
+                  <span class="label">Floodgate UUID</span><div class="value">${_u}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_u}');showCopy('Copied!')">Copy</button></div>`;
+                  _res.className = 'result success';
+              } else {
+                  throw new Error('No results');
+              }
+          } catch {
+              _txt.innerHTML = `❌ Lookup failed: ${err.message}<br><small>Note: Public APIs have rate limits</small>`;
+              _res.className = 'result error';
+          }
       }
   };
 
