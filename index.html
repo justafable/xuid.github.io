@@ -35,6 +35,9 @@
             --error-bg: #fef2f2;
             --error-border: #fecaca;
             --error-text: #991b1b;
+            --info-bg: #eff6ff;
+            --info-border: #bfdbfe;
+            --info-text: #1e40af;
         }
 
         .dark-mode {
@@ -52,6 +55,9 @@
             --error-bg: #2e1818;
             --error-border: #991b1b;
             --error-text: #f87171;
+            --info-bg: #172554;
+            --info-border: #1e40af;
+            --info-text: #93c5fd;
         }
 
         body {
@@ -199,7 +205,7 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            margin-bottom: 16px;
+            margin-bottom: 8px;
         }
 
         input {
@@ -260,6 +266,28 @@
             background: var(--error-bg);
             border: 1px solid var(--error-border);
             color: var(--error-text);
+        }
+
+        .hint {
+            font-size: 0.85rem;
+            padding: 6px 10px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            display: none;
+        }
+
+        .hint.info {
+            background: var(--info-bg);
+            border: 1px solid var(--info-border);
+            color: var(--info-text);
+            display: block;
+        }
+
+        .hint.error {
+            background: var(--error-bg);
+            border: 1px solid var(--error-border);
+            color: var(--error-text);
+            display: block;
         }
 
         .note {
@@ -433,6 +461,7 @@
 
         <div id="lookup-tab" class="tab-content active">
             <p class="desc">Enter Xbox / Bedrock Gamertag below</p>
+            <div id="lookup-hint" class="hint info">Example: Steve123, NotHer0</div>
             <div class="input-group">
                 <input type="text" id="gamertag" placeholder="e.g. Steve123">
                 <button onclick="__LOOKUP__()">🔍 Lookup</button>
@@ -444,6 +473,7 @@
 
         <div id="convert-tab" class="tab-content">
             <p class="desc">Paste a Decimal XUID to convert to Hex & Floodgate UUID</p>
+            <div id="convert-hint" class="hint info">16–17 digit number only</div>
             <div class="input-group">
                 <input type="text" id="decimal-xuid" placeholder="e.g. 2533274956352987">
                 <button onclick="__CONVERT__()">⚡ Convert</button>
@@ -455,6 +485,7 @@
 
         <div id="reverse-tab" class="tab-content">
             <p class="desc">Enter Decimal XUID, Hex XUID, or Floodgate UUID to find the Gamertag</p>
+            <div id="reverse-hint" class="hint info">Supports: Decimal, Hex, or UUID format</div>
             <div class="input-group">
                 <input type="text" id="reverse-input" placeholder="e.g. 2533274956352987 / 23456789ABCDEF / 00000000-...">
                 <button onclick="__REVERSE_LOOKUP__()">🔄 Reverse Search</button>
@@ -514,6 +545,65 @@ document[_0x4e2f[4]]('\x64\x72\x6F\x70', _0x => _0x[_0x4e2f[5]]());
         _0xc.textContent = _0xd;
         _0xc.className = _0xe ? 'result error' : 'result success';
         _0xc.style.display = 'block';
+    }
+
+    // ✅ Copy notification system
+    function showCopyNotification(message, isError = false) {
+        const notif = document.getElementById('copyNotification');
+        notif.textContent = message;
+        notif.classList.toggle('error', isError);
+        notif.classList.add('show');
+        setTimeout(() => notif.classList.remove('show'), 2000);
+    }
+
+    async function copyToClipboard(text) {
+        try {
+            await navigator.clipboard.writeText(text);
+            showCopyNotification('✅ Copied to clipboard!');
+        } catch (err) {
+            showCopyNotification('❌ Failed to copy', true);
+        }
+    }
+
+    // ✅ Input validation hints
+    function updateReverseHint(input) {
+        const hint = document.getElementById('reverse-hint');
+        input = input.trim();
+        if (!input) {
+            hint.textContent = 'Supports: Decimal, Hex, or UUID format';
+            hint.className = 'hint info';
+            return;
+        }
+        if (/^\d+$/.test(input)) {
+            hint.textContent = '✅ Valid Decimal XUID';
+            hint.className = 'hint info';
+        } else if (/^[0-9A-Fa-f]{16}$/.test(input)) {
+            hint.textContent = '✅ Valid Hex XUID';
+            hint.className = 'hint info';
+        } else if (/^00000000-0000-0000-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$/i.test(input)) {
+            hint.textContent = '✅ Valid Floodgate UUID';
+            hint.className = 'hint info';
+        } else {
+            hint.textContent = '❌ Invalid format — check your input';
+            hint.className = 'hint error';
+        }
+    }
+
+    function updateConvertHint(input) {
+        const hint = document.getElementById('convert-hint');
+        input = input.trim();
+        if (!input) {
+            hint.textContent = '16–17 digit number only';
+            hint.className = 'hint info';
+            return;
+        }
+        if (/^\d{16,17}$/.test(input)) {
+            hint.textContent = '✅ Valid Decimal XUID';
+            hint.className = 'hint info';
+        } else {
+            hint.textContent = '❌ Must be 16–17 digits';
+            hint.className = 'hint error';
+        }
     }
 
     window.__SHOW_LOGIN__ = () => {
@@ -590,21 +680,22 @@ document[_0x4e2f[4]]('\x64\x72\x6F\x70', _0x => _0x[_0x4e2f[5]]());
         _txt.innerHTML = '🔄 Searching...', _res.style.display = 'block', _res.className = 'result';
         try {
             const _r = await fetch(`https://api.geysermc.org/v2/xbox/xuid/${encodeURIComponent(_gt)}`);
+            if (!_r.ok) throw new Error(`Status: ${_r.status}`);
             const _d = await _r.json();
             if(_d.xuid) {
                 const _h = BigInt(_d.xuid).toString(16).toUpperCase().padStart(16, '0');
                 const _u = `00000000-0000-0000-${_h.slice(0,4)}-${_h.slice(4)}`.toLowerCase();
                 _txt.innerHTML = `<span class="label">Gamertag</span><div class="value">${_gt}</div>
-                <span class="label">Decimal XUID</span><div class="value">${_d.xuid}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_d.xuid}')">Copy</button></div>
-                <span class="label">Hex XUID</span><div class="value">${_h}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_h}')">Copy</button></div>
-                <span class="label">Floodgate UUID</span><div class="value">${_u}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_u}')">Copy</button></div>`;
+                <span class="label">Decimal XUID</span><div class="value">${_d.xuid}<button class="copy-btn" onclick="copyToClipboard('${_d.xuid}')">Copy</button></div>
+                <span class="label">Hex XUID</span><div class="value">${_h}<button class="copy-btn" onclick="copyToClipboard('${_h}')">Copy</button></div>
+                <span class="label">Floodgate UUID</span><div class="value">${_u}<button class="copy-btn" onclick="copyToClipboard('${_u}')">Copy</button></div>`;
                 _res.className = 'result success';
             } else {
                 _txt.innerHTML = '❌ Not found';
                 _res.className = 'result error';
             }
         } catch(_) {
-            _txt.innerHTML = '❌ Error connecting to API';
+            _txt.innerHTML = '❌ Error connecting to API or invalid gamertag';
             _res.className = 'result error';
         }
     };
@@ -613,13 +704,13 @@ document[_0x4e2f[4]]('\x64\x72\x6F\x70', _0x => _0x[_0x4e2f[5]]());
         const _dec = document.getElementById('decimal-xuid').value.trim();
         const _res = document.getElementById('convert-result');
         const _txt = document.getElementById('convert-text');
-        if(!/^\d+$/.test(_dec)) return _txt.innerHTML = '⚠️ Enter valid decimal', _res.style.display = 'block', _res.className = 'result error';
+        if(!/^\d{16,17}$/.test(_dec)) return _txt.innerHTML = '⚠️ Enter valid 16–17 digit XUID', _res.style.display = 'block', _res.className = 'result error';
         try {
             const _h = BigInt(_dec).toString(16).toUpperCase().padStart(16, '0');
             const _u = `00000000-0000-0000-${_h.slice(0,4)}-${_h.slice(4)}`.toLowerCase();
-            _txt.innerHTML = `<span class="label">Decimal XUID</span><div class="value">${_dec}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_dec}')">Copy</button></div>
-            <span class="label">Hex XUID</span><div class="value">${_h}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_h}')">Copy</button></div>
-            <span class="label">Floodgate UUID</span><div class="value">${_u}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_u}')">Copy</button></div>`;
+            _txt.innerHTML = `<span class="label">Decimal XUID</span><div class="value">${_dec}<button class="copy-btn" onclick="copyToClipboard('${_dec}')">Copy</button></div>
+            <span class="label">Hex XUID</span><div class="value">${_h}<button class="copy-btn" onclick="copyToClipboard('${_h}')">Copy</button></div>
+            <span class="label">Floodgate UUID</span><div class="value">${_u}<button class="copy-btn" onclick="copyToClipboard('${_u}')">Copy</button></div>`;
             _res.style.display = 'block';
             _res.className = 'result success';
         } catch(_) {
@@ -628,33 +719,51 @@ document[_0x4e2f[4]]('\x64\x72\x6F\x70', _0x => _0x[_0x4e2f[5]]());
         }
     };
 
+    // ✅ Fully fixed Reverse Lookup
     window.__REVERSE_LOOKUP__ = async () => {
         const _in = document.getElementById('reverse-input').value.trim();
         const _res = document.getElementById('reverse-result');
         const _txt = document.getElementById('reverse-text');
         let _x = null;
-        if(/^\d+$/.test(_in)) _x = _in;
-        else if(/^[0-9A-Fa-f]{16}$/.test(_in)) _x = BigInt('0x'+_in).toString();
-        else if(/^00000000-0000-0000-([0-9A-Fa-f]{4})-([0-9A-Fa-f]{12})$/i.test(_in)) _x = BigInt('0x'+_in.replace(/-/g,'').slice(-12)).toString();
-        else return _txt.innerHTML = '❌ Invalid format', _res.style.display = 'block', _res.className = 'result error';
+
+        if(/^\d+$/.test(_in)) {
+            _x = _in;
+        } else if(/^[0-9A-Fa-f]{16}$/.test(_in)) {
+            try {
+                _x = BigInt('0x' + _in).toString();
+            } catch {
+                return _txt.innerHTML = '❌ Invalid Hex XUID', _res.style.display = 'block', _res.className = 'result error';
+            }
+        } else if(/^00000000-0000-0000-([0-9A-Fa-f]{4})-([0-9A-Fa-f]{12})$/i.test(_in)) {
+            try {
+                const hexPart = _in.replace(/-/g, '').slice(-12);
+                _x = BigInt('0x' + hexPart).toString();
+            } catch {
+                return _txt.innerHTML = '❌ Invalid UUID format', _res.style.display = 'block', _res.className = 'result error';
+            }
+        } else {
+            return _txt.innerHTML = '❌ Invalid format<br>Use: Decimal XUID, Hex XUID, or Floodgate UUID', _res.style.display = 'block', _res.className = 'result error';
+        }
+
         _txt.innerHTML = '🔄 Searching...', _res.style.display = 'block';
         try {
             const _r = await fetch(`https://api.geysermc.org/v2/xbox/gamertag/${_x}`);
+            if (!_r.ok) throw new Error(`Status: ${_r.status}`);
             const _d = await _r.json();
             if(_d.gamertag) {
                 const _h = BigInt(_x).toString(16).toUpperCase().padStart(16, '0');
                 const _u = `00000000-0000-0000-${_h.slice(0,4)}-${_h.slice(4)}`.toLowerCase();
-                _txt.innerHTML = `<span class="label">Gamertag</span><div class="value">${_d.gamertag}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_d.gamertag}')">Copy</button></div>
-                <span class="label">Decimal XUID</span><div class="value">${_x}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_x}')">Copy</button></div>
-                <span class="label">Hex XUID</span><div class="value">${_h}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_h}')">Copy</button></div>
-                <span class="label">Floodgate UUID</span><div class="value">${_u}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_u}')">Copy</button></div>`;
+                _txt.innerHTML = `<span class="label">Gamertag</span><div class="value">${_d.gamertag}<button class="copy-btn" onclick="copyToClipboard('${_d.gamertag}')">Copy</button></div>
+                <span class="label">Decimal XUID</span><div class="value">${_x}<button class="copy-btn" onclick="copyToClipboard('${_x}')">Copy</button></div>
+                <span class="label">Hex XUID</span><div class="value">${_h}<button class="copy-btn" onclick="copyToClipboard('${_h}')">Copy</button></div>
+                <span class="label">Floodgate UUID</span><div class="value">${_u}<button class="copy-btn" onclick="copyToClipboard('${_u}')">Copy</button></div>`;
                 _res.className = 'result success';
             } else {
-                _txt.innerHTML = '❌ No gamertag found';
+                _txt.innerHTML = '❌ No gamertag found for this ID';
                 _res.className = 'result error';
             }
         } catch(_) {
-            _txt.innerHTML = '❌ API error';
+            _txt.innerHTML = '❌ API error or invalid XUID';
             _res.className = 'result error';
         }
     };
@@ -691,6 +800,10 @@ document[_0x4e2f[4]]('\x64\x72\x6F\x70', _0x => _0x[_0x4e2f[5]]());
             __SHOW_LOGIN__();
         }
     });
+
+    // Add input listeners for validation hints
+    document.getElementById('reverse-input').addEventListener('input', e => updateReverseHint(e.target.value));
+    document.getElementById('decimal-xuid').addEventListener('input', e => updateConvertHint(e.target.value));
 
     document.getElementById('login-password').addEventListener('keydown', _e => _e.key === 'Enter' && __LOGIN__());
     document.getElementById('reg-password2').addEventListener('keydown', _e => _e.key === 'Enter' && __REGISTER__());
