@@ -14,12 +14,9 @@
             padding: 0;
             font-family: system-ui, -apple-system, sans-serif;
             transition: background 0.2s, color 0.2s, border-color 0.2s;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
         }
 
+        /* Light Mode Default */
         :root {
             --bg: #f5f7fa;
             --card: #ffffff;
@@ -35,11 +32,9 @@
             --error-bg: #fef2f2;
             --error-border: #fecaca;
             --error-text: #991b1b;
-            --info-bg: #eff6ff;
-            --info-border: #bfdbfe;
-            --info-text: #1e40af;
         }
 
+        /* Dark Mode Class */
         .dark-mode {
             --bg: #121212;
             --card: #1e1e1e;
@@ -55,9 +50,6 @@
             --error-bg: #2e1818;
             --error-border: #991b1b;
             --error-text: #f87171;
-            --info-bg: #172554;
-            --info-border: #1e40af;
-            --info-text: #93c5fd;
         }
 
         body {
@@ -66,6 +58,7 @@
             min-height: 100vh;
             padding: 20px 16px;
             max-width: 100%;
+            top: 0 !important;
             position: relative;
         }
 
@@ -76,41 +69,7 @@
             color: var(--accent);
         }
 
-        #auth-screen {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 90vh;
-            gap: 16px;
-        }
-
-        #auth-screen .card {
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .auth-toggle {
-            text-align: center;
-            margin-top: 12px;
-            font-size: 0.9rem;
-        }
-
-        .auth-toggle a {
-            color: var(--accent);
-            text-decoration: none;
-            font-weight: 500;
-            cursor: pointer;
-        }
-
-        .auth-toggle a:hover {
-            text-decoration: underline;
-        }
-
-        #app-content {
-            display: none;
-        }
-
+        /* Top Controls Bar */
         .top-controls {
             display: flex;
             justify-content: space-between;
@@ -128,6 +87,29 @@
             color: var(--text);
             font-size: 0.9rem;
             cursor: pointer;
+        }
+
+        /* Smaller, subtle reset button */
+        .reset-lang-btn {
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            opacity: 0.65;
+            transition: opacity 0.2s;
+        }
+
+        .reset-lang-btn:hover {
+            opacity: 1;
+        }
+
+        /* Hide all default Google Translate UI */
+        .goog-te-banner-frame,
+        .goog-te-menu-frame,
+        .goog-te-menu-value span:first-child,
+        #google_translate_element {
+            display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            width: 0 !important;
         }
 
         .card {
@@ -183,7 +165,7 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            margin-bottom: 8px;
+            margin-bottom: 16px;
         }
 
         input {
@@ -194,10 +176,6 @@
             border-radius: 12px;
             color: var(--text);
             font-size: 1rem;
-            -webkit-user-select: text;
-            -moz-user-select: text;
-            -ms-user-select: text;
-            user-select: text;
         }
 
         input:focus {
@@ -220,12 +198,7 @@
             transition: background 0.2s;
         }
 
-        button:disabled {
-            background: #93c5fd;
-            cursor: not-allowed;
-        }
-
-        button:active:not(:disabled) {
+        button:active {
             background: var(--accent-hover);
             transform: scale(0.98);
         }
@@ -242,35 +215,18 @@
         .result.success {
             background: var(--success-bg);
             border: 1px solid var(--success-border);
-            color: var(--success-text);
         }
 
         .result.error {
             background: var(--error-bg);
             border: 1px solid var(--error-border);
-            color: var(--error-text);
         }
 
-        .hint {
-            font-size: 0.85rem;
-            padding: 6px 10px;
-            border-radius: 6px;
-            margin-bottom: 12px;
-            display: none;
-        }
-
-        .hint.info {
-            background: var(--info-bg);
-            border: 1px solid var(--info-border);
-            color: var(--info-text);
-            display: block;
-        }
-
-        .hint.error {
-            background: var(--error-bg);
-            border: 1px solid var(--error-border);
-            color: var(--error-text);
-            display: block;
+        .note {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 12px;
+            line-height: 1.5;
         }
 
         .label {
@@ -281,21 +237,17 @@
             font-size: 0.9rem;
         }
 
-        .value-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
+        .value {
+            font-family: 'Courier New', monospace;
             background: var(--input-bg);
             padding: 12px;
             border-radius: 8px;
             word-break: break-all;
-            font-family: 'Courier New', monospace;
             font-size: 0.9rem;
-            -webkit-user-select: text;
-            -moz-user-select: text;
-            -ms-user-select: text;
-            user-select: text;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
         }
 
         .copy-btn {
@@ -306,7 +258,8 @@
             border-radius: 6px;
             font-size: 0.75rem;
             flex-shrink: 0;
-            border: none;
+            transition: background 0.2s;
+            cursor: pointer;
         }
 
         .copy-btn:active {
@@ -314,6 +267,7 @@
             color: white;
         }
 
+        /* --- Copy Notification --- */
         .copy-notification {
             position: fixed;
             bottom: 30px;
@@ -345,479 +299,411 @@
             opacity: 1;
             transform: translateX(-50%) translateY(0);
         }
-
-        #current-user {
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: var(--accent);
-            background: var(--input-bg);
-            padding: 6px 10px;
-            border-radius: 6px;
-        }
     </style>
 </head>
-<body oncontextmenu="return false;" onkeydown="return __PROT_KEY__(event);">
+<body>
 
+<!-- Hidden Google Translate Container -->
+<div id="google_translate_element"></div>
+
+<!-- Copy Confirmation Message -->
 <div id="copyNotification" class="copy-notification"></div>
 
-<div id="auth-screen">
-    <div style="text-align: center; margin-bottom: 20px;">
-        <img src="https://cdn.discordapp.com/icons/1353430789806751855/c196ff4cec0bbbb5b21fed72db83e895.png" alt="Logo" style="max-width: 80px;">
-    </div>
-
-    <div id="login-form" class="card">
-        <h2 style="text-align:center; margin-bottom:16px;">🔐 Login</h2>
-        <p class="desc">Sign in to access XUID Tools</p>
-        <div class="input-group">
-            <input type="text" id="login-username" placeholder="Username">
-            <input type="password" id="login-password" placeholder="Password">
-            <button onclick="__LOGIN__()">🔓 Sign In</button>
-        </div>
-        <div id="auth-message" class="result" style="display:none;"></div>
-        <div class="auth-toggle">
-            Don't have an account? <a onclick="__SHOW_REG__()">Register here</a><br>
-            <a onclick="__SHOW_FORGOT__()">Forgot your password?</a>
-        </div>
-    </div>
-
-    <div id="register-form" class="card" style="display:none;">
-        <h2 style="text-align:center; margin-bottom:16px;">📝 Create Account</h2>
-        <p class="desc">Choose a username and password</p>
-        <div class="input-group">
-            <input type="text" id="reg-username" placeholder="Username (3–20 chars)">
-            <input type="password" id="reg-password" placeholder="Password (min 6 chars)">
-            <input type="password" id="reg-password2" placeholder="Confirm Password">
-            <button onclick="__REGISTER__()">✅ Create Account</button>
-        </div>
-        <div id="reg-message" class="result" style="display:none;"></div>
-        <div class="auth-toggle">
-            Already have an account? <a onclick="__SHOW_LOGIN__()">Sign in here</a>
-        </div>
-    </div>
-
-    <div id="forgot-form" class="card" style="display:none;">
-        <h2 style="text-align:center; margin-bottom:16px;">🔑 Reset Password</h2>
-        <p class="desc">Enter your username to set a new password</p>
-        <div class="input-group">
-            <input type="text" id="reset-username" placeholder="Your Username">
-            <input type="password" id="new-password" placeholder="New Password (min 6 chars)" style="display:none;">
-            <input type="password" id="new-password2" placeholder="Confirm New Password" style="display:none;">
-            <button id="reset-btn" onclick="__VERIFY_USER__()">Verify Username</button>
-        </div>
-        <div id="reset-message" class="result" style="display:none;"></div>
-        <div class="auth-toggle">
-            <a onclick="__SHOW_LOGIN__()">Back to Login</a>
-        </div>
-    </div>
+<div style="text-align: center">
+    <a href="link">
+        <img src="https://cdn.discordapp.com/icons/1353430789806751855/c196ff4cec0bbbb5b21fed72db83e895.png" alt="Logo" align="center">
+    </a>
 </div>
 
-<div id="app-content">
-    <div style="text-align: center; margin-bottom: 20px;">
-        <img src="https://cdn.discordapp.com/icons/1353430789806751855/c196ff4cec0bbbb5b21fed72db83e895.png" alt="Logo" style="max-width: 80px;">
+<!-- Top Controls -->
+<div class="top-controls">
+    <button id="themeToggle" class="control-btn">🌙 Dark Mode</button>
+</div>
+
+<div class="card">
+    <div class="tabs">
+        <button class="tab active" onclick="switchTab('lookup')">Gamertag Lookup</button>
+        <button class="tab" onclick="switchTab('convert')">Manual Converter</button>
+        <button class="tab" onclick="switchTab('reverse')">Reverse Lookup</button>
     </div>
 
-    <div class="top-controls">
-        <div id="current-user">Not logged in</div>
-        <button id="themeToggle" class="control-btn">🌙 Dark Mode</button>
-        <button onclick="__LOGOUT__()" class="control-btn">🚪 Logout</button>
+    <!-- Lookup Tab -->
+    <div id="lookup-tab" class="tab-content active">
+        <p class="desc">Enter Xbox / Bedrock Gamertag below</p>
+        <div class="input-group">
+            <input type="text" id="gamertag" placeholder="e.g. Steve123">
+            <button onclick="lookup()">🔍 Lookup</button>
+        </div>
+        <div id="lookup-result" class="result">
+            <div id="lookup-text"></div>
+        </div>
+        <div class="note">
+            ℹ️ Uses cached APIs only. If not found, get decimal XUID elsewhere then use the Converter tab.
+        </div>
     </div>
 
-    <div class="card">
-        <div class="tabs">
-            <button class="tab active" onclick="__SWITCH_TAB__('lookup')">Gamertag Lookup</button>
-            <button class="tab" onclick="__SWITCH_TAB__('convert')">Manual Converter</button>
-            <button class="tab" onclick="__SWITCH_TAB__('reverse')">Reverse Lookup</button>
+    <!-- Converter Tab -->
+    <div id="convert-tab" class="tab-content">
+        <p class="desc">Paste a Decimal XUID to convert to Hex & Floodgate UUID</p>
+        <div class="input-group">
+            <input type="text" id="decimal-xuid" placeholder="e.g. 2533274956352987">
+            <button onclick="convert()">⚡ Convert</button>
         </div>
-
-        <div id="lookup-tab" class="tab-content active">
-            <p class="desc">Enter Xbox / Bedrock Gamertag below</p>
-            <div id="lookup-hint" class="hint info">Example: Steve123, NotHer0</div>
-            <div class="input-group">
-                <input type="text" id="gamertag" placeholder="e.g. Steve123">
-                <button onclick="__LOOKUP__()" id="lookup-btn">🔍 Lookup</button>
-            </div>
-            <div id="lookup-result" class="result">
-                <div id="lookup-text"></div>
-            </div>
+        <div id="convert-result" class="result">
+            <div id="convert-text"></div>
         </div>
+    </div>
 
-        <div id="convert-tab" class="tab-content">
-            <p class="desc">Paste a Decimal XUID to convert to Hex & Floodgate UUID</p>
-            <div id="convert-hint" class="hint info">16–17 digit number only</div>
-            <div class="input-group">
-                <input type="text" id="decimal-xuid" placeholder="e.g. 2533274956352987">
-                <button onclick="__CONVERT__()">⚡ Convert</button>
-            </div>
-            <div id="convert-result" class="result">
-                <div id="convert-text"></div>
-            </div>
+    <!-- Reverse Lookup Tab -->
+    <div id="reverse-tab" class="tab-content">
+        <p class="desc">Enter Decimal XUID, Hex XUID, or Floodgate UUID to find the Gamertag</p>
+        <div class="input-group">
+            <input type="text" id="reverse-input" placeholder="e.g. 2533274956352987 / 23456789ABCDEF / 00000000-...">
+            <button onclick="reverseLookup()">🔄 Reverse Search</button>
         </div>
-
-        <div id="reverse-tab" class="tab-content">
-            <p class="desc">Enter Decimal XUID, Hex XUID, or Floodgate UUID to find the Gamertag</p>
-            <div id="reverse-hint" class="hint info">Supports: Decimal, Hex, or UUID format</div>
-            <div class="input-group">
-                <input type="text" id="reverse-input" placeholder="e.g. 2533274956352987 / 23456789ABCDEF / 00000000-...">
-                <button onclick="__REVERSE_LOOKUP__()" id="reverse-btn">🔄 Reverse Search</button>
-            </div>
-            <div id="reverse-result" class="result">
-                <div id="reverse-text"></div>
-            </div>
+        <div id="reverse-result" class="result">
+            <div id="reverse-text"></div>
+        </div>
+        <div class="note">
+            ℹ️ Works with XUID formats and Floodgate UUIDs. Data from GeyserMC and MCProfile APIs.
         </div>
     </div>
 </div>
 
 <script>
 // --------------------------
-// 🔒 Core Protection & Helpers
+// Light / Dark Mode Toggle
 // --------------------------
-function __PROT_KEY__(e) {
-    if (e.keyCode === 123 || 
-        (e.ctrlKey && e.shiftKey && [73,74].includes(e.keyCode)) ||
-        (e.ctrlKey && [85,83,80].includes(e.keyCode))) {
-        e.preventDefault();
-        return false;
+const themeToggle = document.getElementById('themeToggle');
+if (localStorage.getItem('theme') === 'dark' || 
+    (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.body.classList.add('dark-mode');
+    themeToggle.textContent = '☀️ Light Mode';
+}
+
+themeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    themeToggle.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+});
+
+// --------------------------
+// Google Translate Setup
+// --------------------------
+function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        autoDisplay: false,
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+    }, 'google_translate_element');
+
+    const userLang = (navigator.language || navigator.userLanguage).split('-')[0];
+    const select = document.querySelector('.goog-te-combo');
+    if (select && select.value !== userLang) {
+        select.value = userLang;
+        select.dispatchEvent(new Event('change'));
     }
-    return true;
 }
 
-document.addEventListener('dragstart', e => e.preventDefault());
-document.addEventListener('drop', e => e.preventDefault());
+(function() {
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+    document.head.appendChild(script);
+})();
 
-// ✅ Copy function — FIXED and reliable
-function showCopyNotification(message, isError = false) {
-    const notif = document.getElementById('copyNotification');
-    notif.textContent = message;
-    notif.classList.toggle('error', isError);
-    notif.classList.add('show');
-    setTimeout(() => notif.classList.remove('show'), 2200);
+// --------------------------
+// Reset to English Button
+// --------------------------
+const resetBtn = document.getElementById('resetLang');
+if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+        const select = document.querySelector('.goog-te-combo');
+        if (select) {
+            select.value = 'en';
+            select.dispatchEvent(new Event('change'));
+        }
+    });
 }
 
-async function copyToClipboard(text) {
-    try {
-        await navigator.clipboard.writeText(text);
-        showCopyNotification('✅ Copied to clipboard!');
-    } catch (err) {
+// --------------------------
+// Copy Function with Success/Error Message
+// --------------------------
+const copyNotification = document.getElementById('copyNotification');
+let copyNotificationTimer;
+
+function copyText(text) {
+    const cleanText = text.trim();
+
+    if (navigator.clipboard && window.isSecureContext) {
+        // Modern secure method
+        navigator.clipboard.writeText(cleanText)
+            .then(() => {
+                showNotification('✅ Successfully copied to clipboard!', false);
+            })
+            .catch(() => {
+                fallbackCopy(cleanText);
+            });
+    } else {
         // Fallback for older browsers
+        fallbackCopy(cleanText);
+    }
+}
+
+function fallbackCopy(text) {
+    try {
         const temp = document.createElement('textarea');
         temp.value = text;
         temp.style.position = 'absolute';
-        temp.style.opacity = '0';
+        temp.style.left = '-9999px';
         document.body.appendChild(temp);
         temp.select();
         document.execCommand('copy');
         document.body.removeChild(temp);
-        showCopyNotification('✅ Copied to clipboard!');
+        showNotification('✅ Successfully copied to clipboard!', false);
+    } catch (err) {
+        showNotification('❌ Failed to copy. Please try again.', true);
+    }
+}
+
+function showNotification(message, isError = false) {
+    copyNotification.textContent = message;
+    copyNotification.classList.toggle('error', isError);
+    copyNotification.classList.add('show');
+    clearTimeout(copyNotificationTimer);
+    copyNotificationTimer = setTimeout(() => {
+        copyNotification.classList.remove('show');
+    }, 2200);
+}
+
+// --------------------------
+// Helper to escape text
+// --------------------------
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/'/g, '&#039;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
+// --------------------------
+// Core App Functions
+// --------------------------
+function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    const activeBtn = document.querySelector(`.tab[onclick="switchTab('${tab}')"]`);
+    if (activeBtn) activeBtn.classList.add('active');
+    document.getElementById(`${tab}-tab`).classList.add('active');
+}
+
+async function lookup() {
+    const gamertag = document.getElementById('gamertag').value.trim();
+    const resultEl = document.getElementById('lookup-result');
+    const textEl = document.getElementById('lookup-text');
+    
+    if(!gamertag) {
+        showResult(textEl, resultEl, '⚠️ Please enter a gamertag.', 'error');
+        return;
+    }
+
+    showResult(textEl, resultEl, '🔄 Searching...', '');
+    let xuid = null;
+    let source = '';
+
+    try {
+        const res1 = await fetch(`https://api.geysermc.org/v2/xbox/xuid/${encodeURIComponent(gamertag)}`);
+        const data1 = await res1.json();
+        if(data1.xuid) { xuid = String(data1.xuid); source = 'Geyser API'; }
+    } catch(e) {}
+
+    if(!xuid) {
+        try {
+            const res2 = await fetch(`https://mcprofile.io/api/v1/bedrock/gamertag/${encodeURIComponent(gamertag)}`);
+            const data2 = await res2.json();
+            if(data2.xuid) { xuid = String(data2.xuid); source = 'MCProfile API'; }
+        } catch(e) {}
+    }
+
+    if(!xuid) {
+        showResult(textEl, resultEl, '❌ Not found in cached databases.\nGet decimal XUID elsewhere then use Converter tab.', 'error');
+        return;
+    }
+
+    const hex = BigInt(xuid).toString(16).toUpperCase().padStart(16, '0');
+    const uuid = `00000000-0000-0000-${hex.slice(0,4)}-${hex.slice(4)}`.toLowerCase();
+
+    textEl.innerHTML = `
+        <span class="label">Gamertag</span>
+        <div class="value">${escapeHtml(gamertag)}</div>
+
+        <span class="label">Source</span>
+        <div class="value">${escapeHtml(source)}</div>
+
+        <span class="label">Decimal XUID</span>
+        <div class="value">
+            ${escapeHtml(xuid)}
+            <button class="copy-btn" onclick="copyText('${escapeHtml(xuid)}')">Copy</button>
+        </div>
+
+        <span class="label">Hex XUID</span>
+        <div class="value">
+            ${escapeHtml(hex)}
+            <button class="copy-btn" onclick="copyText('${escapeHtml(hex)}')">Copy</button>
+        </div>
+
+        <span class="label">Floodgate UUID</span>
+        <div class="value" style="font-size:0.8rem">
+            ${escapeHtml(uuid)}
+            <button class="copy-btn" onclick="copyText('${escapeHtml(uuid)}')">Copy</button>
+        </div>
+    `;
+    resultEl.className = 'result success';
+    resultEl.style.display = 'block';
+}
+
+function convert() {
+    const decimal = document.getElementById('decimal-xuid').value.trim();
+    const resultEl = document.getElementById('convert-result');
+    const textEl = document.getElementById('convert-text');
+
+    if(!decimal || !/^\d+$/.test(decimal)) {
+        showResult(textEl, resultEl, '⚠️ Enter a valid decimal number only.', 'error');
+        return;
+    }
+
+    try {
+        const hex = BigInt(decimal).toString(16).toUpperCase().padStart(16, '0');
+        const uuid = `00000000-0000-0000-${hex.slice(0,4)}-${hex.slice(4)}`.toLowerCase();
+
+        textEl.innerHTML = `
+            <span class="label">Decimal XUID</span>
+            <div class="value">
+                ${escapeHtml(decimal)}
+                <button class="copy-btn" onclick="copyText('${escapeHtml(decimal)}')">Copy</button>
+            </div>
+
+            <span class="label">Hex XUID</span>
+            <div class="value">
+                ${escapeHtml(hex)}
+                <button class="copy-btn" onclick="copyText('${escapeHtml(hex)}')">Copy</button>
+            </div>
+
+            <span class="label">Floodgate UUID</span>
+            <div class="value" style="font-size:0.8rem">
+                ${escapeHtml(uuid)}
+                <button class="copy-btn" onclick="copyText('${escapeHtml(uuid)}')">Copy</button>
+            </div>
+        `;
+        resultEl.className = 'result success';
+        resultEl.style.display = 'block';
+    } catch(e) {
+        showResult(textEl, resultEl, '❌ Error — invalid number.', 'error');
     }
 }
 
 // --------------------------
-// App Logic
+// NEW: Reverse Lookup Function
 // --------------------------
-(function() {
-    const _SESSION = 'xuidToolsAuth';
-    const _USER = 'xuidToolsUsername';
-    const _DB = 'xuidToolsUsers';
+async function reverseLookup() {
+    const input = document.getElementById('reverse-input').value.trim();
+    const resultEl = document.getElementById('reverse-result');
+    const textEl = document.getElementById('reverse-text');
 
-    async function hashPass(str) {
-        const encoder = new TextEncoder();
-        const data = encoder.encode(str);
-        const hash = await crypto.subtle.digest('SHA-256', data);
-        return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+    if (!input) {
+        showResult(textEl, resultEl, '⚠️ Please enter an ID or UUID.', 'error');
+        return;
     }
 
-    function getDB() {
-        const db = localStorage.getItem(_DB);
-        return db ? JSON.parse(db) : {};
+    showResult(textEl, resultEl, '🔍 Searching...', '');
+
+    let decimalXuid = null;
+
+    // Detect and convert input format
+    if (/^\d+$/.test(input)) {
+        // Decimal XUID
+        decimalXuid = input;
+    } else if (/^[0-9A-Fa-f]{16}$/.test(input)) {
+        // Hex XUID
+        decimalXuid = BigInt('0x' + input).toString();
+    } else if (/^00000000-0000-0000-([0-9A-Fa-f]{4})-([0-9A-Fa-f]{12})$/i.test(input)) {
+        // Floodgate UUID
+        const hexPart = input.replace(/^00000000-0000-0000-/, '').replace(/-/, '');
+        decimalXuid = BigInt('0x' + hexPart).toString();
+    } else {
+        showResult(textEl, resultEl, '❌ Invalid format. Use Decimal XUID, Hex XUID, or Floodgate UUID.', 'error');
+        return;
     }
 
-    function saveDB(db) {
-        localStorage.setItem(_DB, JSON.stringify(db));
-    }
+    let gamertag = null;
+    let source = '';
 
-    function setResult(el, msg, isError = false) {
-        el.innerHTML = msg;
-        el.className = isError ? 'result error' : 'result success';
-        el.style.display = 'block';
-    }
+    try {
+        const res1 = await fetch(`https://api.geysermc.org/v2/xbox/gamertag/${decimalXuid}`);
+        const data1 = await res1.json();
+        if (data1.gamertag) { gamertag = data1.gamertag; source = 'Geyser API'; }
+    } catch (e) {}
 
-    // Input validation
-    document.getElementById('reverse-input').addEventListener('input', e => {
-        const hint = document.getElementById('reverse-hint');
-        const val = e.target.value.trim();
-        if (!val) {
-            hint.textContent = 'Supports: Decimal, Hex, or UUID format';
-            hint.className = 'hint info';
-            return;
-        }
-        if (/^\d+$/.test(val)) {
-            hint.textContent = '✅ Valid Decimal XUID';
-            hint.className = 'hint info';
-        } else if (/^[0-9A-Fa-f]{16}$/.test(val)) {
-            hint.textContent = '✅ Valid Hex XUID';
-            hint.className = 'hint info';
-        } else if (/^00000000-0000-0000-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$/i.test(val)) {
-            hint.textContent = '✅ Valid Floodgate UUID';
-            hint.className = 'hint info';
-        } else {
-            hint.textContent = '❌ Invalid format — check your input';
-            hint.className = 'hint error';
-        }
-    });
-
-    document.getElementById('decimal-xuid').addEventListener('input', e => {
-        const hint = document.getElementById('convert-hint');
-        const val = e.target.value.trim();
-        if (!val) {
-            hint.textContent = '16–17 digit number only';
-            hint.className = 'hint info';
-            return;
-        }
-        if (/^\d{16,17}$/.test(val)) {
-            hint.textContent = '✅ Valid Decimal XUID';
-            hint.className = 'hint info';
-        } else {
-            hint.textContent = '❌ Must be 16–17 digits';
-            hint.className = 'hint error';
-        }
-    });
-
-    // Auth functions
-    window.__SHOW_LOGIN__ = () => {
-        document.getElementById('login-form').style.display = 'block';
-        document.getElementById('register-form').style.display = 'none';
-        document.getElementById('forgot-form').style.display = 'none';
-        document.getElementById('auth-message').style.display = 'none';
-    };
-
-    window.__SHOW_REG__ = () => {
-        document.getElementById('login-form').style.display = 'none';
-        document.getElementById('register-form').style.display = 'block';
-        document.getElementById('reg-message').style.display = 'none';
-    };
-
-    window.__SHOW_FORGOT__ = () => {
-        document.getElementById('login-form').style.display = 'none';
-        document.getElementById('forgot-form').style.display = 'block';
-        document.getElementById('reset-message').style.display = 'none';
-    };
-
-    window.__LOGIN__ = async () => {
-        const user = document.getElementById('login-username').value.trim();
-        const pass = document.getElementById('login-password').value.trim();
-        const msgEl = document.getElementById('auth-message');
-        if (!user || !pass) return setResult(msgEl, '⚠️ Fill in both fields', true);
-        const db = getDB();
-        if (!db[user]) return setResult(msgEl, '❌ Username not found', true);
-        const hash = await hashPass(pass);
-        if (hash !== db[user]) return setResult(msgEl, '❌ Incorrect password', true);
-        localStorage.setItem(_SESSION, 'true');
-        localStorage.setItem(_USER, user);
-        document.getElementById('auth-screen').style.display = 'none';
-        document.getElementById('app-content').style.display = 'block';
-        document.getElementById('current-user').textContent = `👤 ${user}`;
-    };
-
-    window.__REGISTER__ = async () => {
-        const user = document.getElementById('reg-username').value.trim();
-        const p1 = document.getElementById('reg-password').value.trim();
-        const p2 = document.getElementById('reg-password2').value.trim();
-        const msgEl = document.getElementById('reg-message');
-        if (user.length < 3 || user.length > 20) return setResult(msgEl, '⚠️ Username 3–20 chars', true);
-        if (p1.length < 6) return setResult(msgEl, '⚠️ Password min 6 chars', true);
-        if (p1 !== p2) return setResult(msgEl, '⚠️ Passwords do not match', true);
-        const db = getDB();
-        if (db[user]) return setResult(msgEl, '❌ Username already taken', true);
-        db[user] = await hashPass(p1);
-        saveDB(db);
-        setResult(msgEl, '✅ Account created! You can sign in now.');
-    };
-
-    window.__LOGOUT__ = () => {
-        localStorage.removeItem(_SESSION);
-        localStorage.removeItem(_USER);
-        document.getElementById('auth-screen').style.display = 'flex';
-        document.getElementById('app-content').style.display = 'none';
-        __SHOW_LOGIN__();
-    };
-
-    window.__SWITCH_TAB__ = tab => {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-        document.querySelector(`.tab[onclick="__SWITCH_TAB__('${tab}')"]`).classList.add('active');
-        document.getElementById(`${tab}-tab`).style.display = 'block';
-    };
-
-    // Lookup functions
-    window.__LOOKUP__ = async () => {
-        const gt = document.getElementById('gamertag').value.trim();
-        const resEl = document.getElementById('lookup-result');
-        const btn = document.getElementById('lookup-btn');
-        if (!gt) return setResult(resEl, '⚠️ Enter a gamertag', true);
-        btn.disabled = true;
-        setResult(resEl, '🔄 Searching...');
+    if (!gamertag) {
         try {
-            const r = await fetch(`https://api.geysermc.org/v2/xbox/xuid/${encodeURIComponent(gt)}`);
-            if (!r.ok) throw new Error('Not found');
-            const d = await r.json();
-            if (d.xuid) {
-                const hex = BigInt(d.xuid).toString(16).toUpperCase().padStart(16, '0');
-                const uuid = `00000000-0000-0000-${hex.slice(0,4)}-${hex.slice(4)}`.toLowerCase();
-                const html = `
-                    <span class="label">Gamertag</span>
-                    <div class="value-row">${gt}</div>
-                    <span class="label">Decimal XUID</span>
-                    <div class="value-row">${d.xuid}<button class="copy-btn" onclick="copyToClipboard('${d.xuid.replace(/'/g, "\\'")}')">Copy</button></div>
-                    <span class="label">Hex XUID</span>
-                    <div class="value-row">${hex}<button class="copy-btn" onclick="copyToClipboard('${hex}')">Copy</button></div>
-                    <span class="label">Floodgate UUID</span>
-                    <div class="value-row">${uuid}<button class="copy-btn" onclick="copyToClipboard('${uuid}')">Copy</button></div>
-                `;
-                setResult(resEl, html);
-            } else {
-                setResult(resEl, '❌ Gamertag not found', true);
-            }
-        } catch {
-            setResult(resEl, '❌ Failed — invalid gamertag or API error', true);
-        } finally {
-            setTimeout(() => btn.disabled = false, 1200);
-        }
-    };
+            const res2 = await fetch(`https://mcprofile.io/api/v1/bedrock/xuid/${decimalXuid}`);
+            const data2 = await res2.json();
+            if (data2.gamertag) { gamertag = data2.gamertag; source = 'MCProfile API'; }
+        } catch (e) {}
+    }
 
-    window.__CONVERT__ = () => {
-        const dec = document.getElementById('decimal-xuid').value.trim();
-        const resEl = document.getElementById('convert-result');
-        if (!/^\d{16,17}$/.test(dec)) return setResult(resEl, '⚠️ Enter valid 16–17 digit XUID', true);
-        try {
-            const hex = BigInt(dec).toString(16).toUpperCase().padStart(16, '0');
-            const uuid = `00000000-0000-0000-${hex.slice(0,4)}-${hex.slice(4)}`.toLowerCase();
-            const html = `
-                <span class="label">Decimal XUID</span>
-                <div class="value-row">${dec}<button class="copy-btn" onclick="copyToClipboard('${dec}')">Copy</button></div>
-                <span class="label">Hex XUID</span>
-                <div class="value-row">${hex}<button class="copy-btn" onclick="copyToClipboard('${hex}')">Copy</button></div>
-                <span class="label">Floodgate UUID</span>
-                <div class="value-row">${uuid}<button class="copy-btn" onclick="copyToClipboard('${uuid}')">Copy</button></div>
-            `;
-            setResult(resEl, html);
-        } catch {
-            setResult(resEl, '❌ Invalid number', true);
-        }
-    };
+    if (!gamertag) {
+        showResult(textEl, resultEl, '❌ No matching gamertag found in databases.', 'error');
+        return;
+    }
 
-    window.__REVERSE_LOOKUP__ = async () => {
-        const input = document.getElementById('reverse-input').value.trim();
-        const resEl = document.getElementById('reverse-result');
-        const btn = document.getElementById('reverse-btn');
-        let xuid = null;
+    const hex = BigInt(decimalXuid).toString(16).toUpperCase().padStart(16, '0');
+    const uuid = `00000000-0000-0000-${hex.slice(0,4)}-${hex.slice(4)}`.toLowerCase();
 
-        if (!input) return setResult(resEl, '⚠️ Enter XUID or UUID', true);
+    textEl.innerHTML = `
+        <span class="label">Gamertag</span>
+        <div class="value">
+            ${escapeHtml(gamertag)}
+            <button class="copy-btn" onclick="copyText('${escapeHtml(gamertag)}')">Copy</button>
+        </div>
 
-        // Parse input
-        if (/^\d+$/.test(input)) {
-            xuid = input;
-        } else if (/^[0-9A-Fa-f]{16}$/.test(input)) {
-            try { xuid = BigInt('0x' + input).toString(); }
-            catch { return setResult(resEl, '❌ Invalid Hex XUID', true); }
-        } else if (/^00000000-0000-0000-([0-9A-Fa-f]{4})-([0-9A-Fa-f]{12})$/i.test(input)) {
-            try {
-                const hexPart = input.replace(/-/g, '').slice(-12);
-                xuid = BigInt('0x' + hexPart).toString();
-            } catch { return setResult(resEl, '❌ Invalid UUID format', true); }
-        } else {
-            return setResult(resEl, '❌ Use Decimal, Hex, or Floodgate UUID', true);
-        }
+        <span class="label">Source</span>
+        <div class="value">${escapeHtml(source)}</div>
 
-        btn.disabled = true;
-        setResult(resEl, '🔄 Searching...');
+        <span class="label">Decimal XUID</span>
+        <div class="value">
+            ${escapeHtml(decimalXuid)}
+            <button class="copy-btn" onclick="copyText('${escapeHtml(decimalXuid)}')">Copy</button>
+        </div>
 
-        try {
-            let r = await fetch(`https://api.geysermc.org/v2/xbox/gamertag/${xuid}`);
-            let d = await r.json().catch(() => ({}));
+        <span class="label">Hex XUID</span>
+        <div class="value">
+            ${escapeHtml(hex)}
+            <button class="copy-btn" onclick="copyText('${escapeHtml(hex)}')">Copy</button>
+        </div>
 
-            // Fallback if Geyser fails
-            if (!r.ok || !d.gamertag) {
-                r = await fetch(`https://xboxapi.com/v2/${xuid}/profile`);
-                d = await r.json().catch(() => ({}));
-                if (d.Gamertag) d.gamertag = d.Gamertag;
-            }
+        <span class="label">Floodgate UUID</span>
+        <div class="value" style="font-size:0.8rem">
+            ${escapeHtml(uuid)}
+            <button class="copy-btn" onclick="copyText('${escapeHtml(uuid)}')">Copy</button>
+        </div>
+    `;
+    resultEl.className = 'result success';
+    resultEl.style.display = 'block';
+}
 
-            if (d.gamertag) {
-                const hex = BigInt(xuid).toString(16).toUpperCase().padStart(16, '0');
-                const uuid = `00000000-0000-0000-${hex.slice(0,4)}-${hex.slice(4)}`.toLowerCase();
-                const html = `
-                    <span class="label">Gamertag</span>
-                    <div class="value-row">${d.gamertag}<button class="copy-btn" onclick="copyToClipboard('${d.gamertag.replace(/'/g, "\\'")}')">Copy</button></div>
-                    <span class="label">Decimal XUID</span>
-                    <div class="value-row">${xuid}<button class="copy-btn" onclick="copyToClipboard('${xuid}')">Copy</button></div>
-                    <span class="label">Hex XUID</span>
-                    <div class="value-row">${hex}<button class="copy-btn" onclick="copyToClipboard('${hex}')">Copy</button></div>
-                    <span class="label">Floodgate UUID</span>
-                    <div class="value-row">${uuid}<button class="copy-btn" onclick="copyToClipboard('${uuid}')">Copy</button></div>
-                `;
-                setResult(resEl, html);
-            } else {
-                setResult(resEl, `⚠️ Not found / rate limited<br><br>GeyserMC only returns cached results. Your XUID is valid: <code>${xuid}</code>`, true);
-            }
-        } catch {
-            setResult(resEl, `❌ Service unavailable<br>Try again later — APIs are rate-limited.`, true);
-        } finally {
-            setTimeout(() => btn.disabled = false, 1500);
-        }
-    };
+function showResult(elWrap, elBox, html, type) {
+    elWrap.innerHTML = html;
+    elBox.className = 'result ' + type;
+    elBox.style.display = 'block';
+}
 
-    // Forgot password
-    window.__VERIFY_USER__ = () => {
-        const user = document.getElementById('reset-username').value.trim();
-        const msgEl = document.getElementById('reset-message');
-        const db = getDB();
-        if (!user) return setResult(msgEl, '⚠️ Enter username', true);
-        if (!db[user]) return setResult(msgEl, '❌ Username not found', true);
-        document.getElementById('reset-username').style.display = 'none';
-        document.getElementById('new-password').style.display = 'block';
-        document.getElementById('new-password2').style.display = 'block';
-        document.getElementById('reset-btn').textContent = 'Update Password';
-        document.getElementById('reset-btn').onclick = async () => {
-            const p1 = document.getElementById('new-password').value.trim();
-            const p2 = document.getElementById('new-password2').value.trim();
-            if (p1.length < 6) return setResult(msgEl, '⚠️ Password min 6 chars', true);
-            if (p1 !== p2) return setResult(msgEl, '⚠️ Passwords do not match', true);
-            db[user] = await hashPass(p1);
-            saveDB(db);
-            setResult(msgEl, '✅ Password updated!');
-            setTimeout(__SHOW_LOGIN__, 2500);
-        };
-    };
-
-    // Load saved session
-    window.addEventListener('load', () => {
-        if (localStorage.getItem(_SESSION) === 'true') {
-            const user = localStorage.getItem(_USER);
-            document.getElementById('auth-screen').style.display = 'none';
-            document.getElementById('app-content').style.display = 'block';
-            document.getElementById('current-user').textContent = `👤 ${user}`;
-        }
-
-        // Dark mode
-        if (localStorage.getItem('theme') === 'dark' || window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.body.classList.add('dark-mode');
-            document.getElementById('themeToggle').textContent = '☀️ Light Mode';
-        }
-        document.getElementById('themeToggle').addEventListener('click', () => {
-            document.body.classList.toggle('dark-mode');
-            const isDark = document.body.classList.contains('dark-mode');
-            document.getElementById('themeToggle').textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        });
-
-        // Enter key support
-        document.getElementById('login-password').addEventListener('keydown', e => e.key === 'Enter' && __LOGIN__());
-        document.getElementById('reg-password2').addEventListener('keydown', e => e.key === 'Enter' && __REGISTER__());
-        document.getElementById('gamertag').addEventListener('keydown', e => e.key === 'Enter' && __LOOKUP__());
-        document.getElementById('decimal-xuid').addEventListener('keydown', e => e.key === 'Enter' && __CONVERT__());
-        document.getElementById('reverse-input').addEventListener('keydown', e => e.key === 'Enter' && __REVERSE_LOOKUP__());
-    });
-})();
+document.getElementById('gamertag').addEventListener('keydown', e => e.key === 'Enter' && lookup());
+document.getElementById('decimal-xuid').addEventListener('keydown', e => e.key === 'Enter' && convert());
+document.getElementById('reverse-input').addEventListener('keydown', e => e.key === 'Enter' && reverseLookup());
 </script>
 </body>
 </html>
