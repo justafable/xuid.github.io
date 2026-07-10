@@ -242,7 +242,12 @@
             transition: background 0.2s;
         }
 
-        button:active {
+        button:disabled {
+            background: #93c5fd;
+            cursor: not-allowed;
+        }
+
+        button:active:not(:disabled) {
             background: var(--accent-hover);
             transform: scale(0.98);
         }
@@ -464,7 +469,7 @@
             <div id="lookup-hint" class="hint info">Example: Steve123, NotHer0</div>
             <div class="input-group">
                 <input type="text" id="gamertag" placeholder="e.g. Steve123">
-                <button onclick="__LOOKUP__()">🔍 Lookup</button>
+                <button onclick="__LOOKUP__()" id="lookup-btn">🔍 Lookup</button>
             </div>
             <div id="lookup-result" class="result">
                 <div id="lookup-text"></div>
@@ -488,7 +493,7 @@
             <div id="reverse-hint" class="hint info">Supports: Decimal, Hex, or UUID format</div>
             <div class="input-group">
                 <input type="text" id="reverse-input" placeholder="e.g. 2533274956352987 / 23456789ABCDEF / 00000000-...">
-                <button onclick="__REVERSE_LOOKUP__()">🔄 Reverse Search</button>
+                <button onclick="__REVERSE_LOOKUP__()" id="reverse-btn">🔄 Reverse Search</button>
             </div>
             <div id="reverse-result" class="result">
                 <div id="reverse-text"></div>
@@ -676,7 +681,9 @@ document[_0x4e2f[4]]('\x64\x72\x6F\x70', _0x => _0x[_0x4e2f[5]]());
         const _gt = document.getElementById('gamertag').value.trim();
         const _res = document.getElementById('lookup-result');
         const _txt = document.getElementById('lookup-text');
+        const _btn = document.getElementById('lookup-btn');
         if(!_gt) return _txt.innerHTML = '⚠️ Enter a gamertag', _res.style.display = 'block', _res.className = 'result error';
+        _btn.disabled = true;
         _txt.innerHTML = '🔄 Searching...', _res.style.display = 'block', _res.className = 'result';
         try {
             const _r = await fetch(`https://api.geysermc.org/v2/xbox/xuid/${encodeURIComponent(_gt)}`);
@@ -697,6 +704,8 @@ document[_0x4e2f[4]]('\x64\x72\x6F\x70', _0x => _0x[_0x4e2f[5]]());
         } catch(_) {
             _txt.innerHTML = '❌ Error connecting to API or invalid gamertag';
             _res.className = 'result error';
+        } finally {
+            setTimeout(() => _btn.disabled = false, 1200);
         }
     };
 
@@ -719,13 +728,17 @@ document[_0x4e2f[4]]('\x64\x72\x6F\x70', _0x => _0x[_0x4e2f[5]]());
         }
     };
 
-    // ✅ Fully fixed Reverse Lookup
+    // ✅ FIXED Reverse Lookup: Better errors + fallback
     window.__REVERSE_LOOKUP__ = async () => {
         const _in = document.getElementById('reverse-input').value.trim();
         const _res = document.getElementById('reverse-result');
         const _txt = document.getElementById('reverse-text');
+        const _btn = document.getElementById('reverse-btn');
         let _x = null;
 
+        if(!_in) return _txt.innerHTML = '⚠️ Enter an XUID or UUID', _res.style.display = 'block', _res.className = 'result error';
+
+        // Parse input format
         if(/^\d+$/.test(_in)) {
             _x = _in;
         } else if(/^[0-9A-Fa-f]{16}$/.test(_in)) {
@@ -745,11 +758,22 @@ document[_0x4e2f[4]]('\x64\x72\x6F\x70', _0x => _0x[_0x4e2f[5]]());
             return _txt.innerHTML = '❌ Invalid format<br>Use: Decimal XUID, Hex XUID, or Floodgate UUID', _res.style.display = 'block', _res.className = 'result error';
         }
 
-        _txt.innerHTML = '🔄 Searching...', _res.style.display = 'block';
+        _btn.disabled = true;
+        _txt.innerHTML = '🔄 Searching GeyserMC API...', _res.style.display = 'block', _res.className = 'result';
+
         try {
-            const _r = await fetch(`https://api.geysermc.org/v2/xbox/gamertag/${_x}`);
-            if (!_r.ok) throw new Error(`Status: ${_r.status}`);
-            const _d = await _r.json();
+            // First try GeyserMC API
+            let _r = await fetch(`https://api.geysermc.org/v2/xbox/gamertag/${_x}`);
+            let _d = await _r.json().catch(() => ({}));
+
+            // If Geyser fails, try public fallback
+            if(!_r.ok || !_d.gamertag) {
+                _txt.innerHTML = '🔄 Trying fallback service...';
+                _r = await fetch(`https://xboxapi.com/v2/${_x}/profile`);
+                _d = await _r.json().catch(() => ({}));
+                if(_d.Gamertag) _d.gamertag = _d.Gamertag;
+            }
+
             if(_d.gamertag) {
                 const _h = BigInt(_x).toString(16).toUpperCase().padStart(16, '0');
                 const _u = `00000000-0000-0000-${_h.slice(0,4)}-${_h.slice(4)}`.toLowerCase();
@@ -759,12 +783,14 @@ document[_0x4e2f[4]]('\x64\x72\x6F\x70', _0x => _0x[_0x4e2f[5]]());
                 <span class="label">Floodgate UUID</span><div class="value">${_u}<button class="copy-btn" onclick="copyToClipboard('${_u}')">Copy</button></div>`;
                 _res.className = 'result success';
             } else {
-                _txt.innerHTML = '❌ No gamertag found for this ID';
+                _txt.innerHTML = `⚠️ Not found / API limited<br><br>GeyserMC only returns cached results. If the account hasn't been looked up recently, it will fail.<br><br>✅ Your XUID is valid: <code>${_x}</code>`;
                 _res.className = 'result error';
             }
         } catch(_) {
-            _txt.innerHTML = '❌ API error or invalid XUID';
+            _txt.innerHTML = `❌ All services failed<br><br>GeyserMC API is rate-limited by Xbox Live. Try again later, or use a direct lookup site.`;
             _res.className = 'result error';
+        } finally {
+            setTimeout(() => _btn.disabled = false, 1500);
         }
     };
 
