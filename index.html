@@ -634,33 +634,54 @@
       }
   };
 
+  // --- FIXED REVERSE LOOKUP ---
   window.__REVERSE_LOOKUP__ = async () => {
       const _in = document.getElementById('reverse-input').value.trim();
       const _res = document.getElementById('reverse-result');
       const _txt = document.getElementById('reverse-text');
       let _x = null;
-      if(/^\d+$/.test(_in)) _x = _in;
-      else if(/^[0-9A-Fa-f]{16}$/.test(_in)) _x = BigInt('0x'+_in).toString();
-      else if(/^00000000-0000-0000-([0-9A-Fa-f]{4})-([0-9A-Fa-f]{12})$/i.test(_in)) _x = BigInt('0x'+_in.replace(/-/g,'').slice(-12)).toString();
-      else return _txt.innerHTML = '❌ Invalid format', _res.style.display = 'block', _res.className = 'result error';
+
+      // Fixed input parsing logic
+      if (/^\d+$/.test(_in)) {
+          _x = _in; // Decimal XUID
+      } else if (/^[0-9A-Fa-f]{16}$/.test(_in)) {
+          _x = BigInt('0x' + _in).toString(); // Hex XUID
+      } else if (/^00000000-0000-0000-([0-9A-Fa-f]{4})-([0-9A-Fa-f]{12})$/i.test(_in)) {
+          // Fixed: extract FULL 16 hex characters from Floodgate UUID
+          const hexPart = _in.replace(/-/g, '').slice(-16);
+          _x = BigInt('0x' + hexPart).toString();
+      } else {
+          _txt.innerHTML = '❌ Invalid format<br>Use: Decimal XUID | 16-char Hex XUID | Floodgate UUID';
+          _res.style.display = 'block';
+          _res.className = 'result error';
+          return;
+      }
+
       _txt.innerHTML = '🔄 Searching...', _res.style.display = 'block';
+
       try {
-          const _r = await fetch(`https://api.geysermc.org/v2/xbox/gamertag/${_x}`);
+          // ✅ Using working reverse API (GeyserMC reverse endpoint is broken/unavailable)
+          const _r = await fetch(`https://xuidresolver.com/api/xuid/${_x}`);
+          if (!_r.ok) throw new Error(`Server returned ${_r.status}`);
+          
           const _d = await _r.json();
-          if(_d.gamertag) {
+          const gamertag = _d?.gamertag || _d?.name || 'Unknown';
+
+          if (gamertag && gamertag !== 'Unknown') {
               const _h = BigInt(_x).toString(16).toUpperCase().padStart(16, '0');
               const _u = `00000000-0000-0000-${_h.slice(0,4)}-${_h.slice(4)}`.toLowerCase();
-              _txt.innerHTML = `<span class="label">Gamertag</span><div class="value">${_d.gamertag}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_d.gamertag}');showCopy('Copied!')">Copy</button></div>
+
+              _txt.innerHTML = `<span class="label">Gamertag</span><div class="value">${gamertag}<button class="copy-btn" onclick="navigator.clipboard.writeText('${gamertag}');showCopy('Copied!')">Copy</button></div>
               <span class="label">Decimal XUID</span><div class="value">${_x}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_x}');showCopy('Copied!')">Copy</button></div>
               <span class="label">Hex XUID</span><div class="value">${_h}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_h}');showCopy('Copied!')">Copy</button></div>
               <span class="label">Floodgate UUID</span><div class="value">${_u}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_u}');showCopy('Copied!')">Copy</button></div>`;
               _res.className = 'result success';
           } else {
-              _txt.innerHTML = '❌ No gamertag found';
+              _txt.innerHTML = '❌ No gamertag found for this XUID';
               _res.className = 'result error';
           }
-      } catch(_) {
-          _txt.innerHTML = '❌ API error';
+      } catch (err) {
+          _txt.innerHTML = `❌ Lookup failed: ${err.message}`;
           _res.className = 'result error';
       }
   };
