@@ -369,7 +369,7 @@
         <h2 style="text-align:center; margin-bottom:16px;">🔐 Login</h2>
         <p class="desc">Sign in to access XUID Tools</p>
         <div class="input-group">
-            <input type="text" id="login-username" placeholder="Username">
+            <input type="email" id="login-email" placeholder="Email">
             <input type="password" id="login-password" placeholder="Password">
             <button onclick="__LOGIN__()">🔓 Sign In</button>
         </div>
@@ -382,9 +382,9 @@
 
     <div id="register-form" class="card" style="display:none;">
         <h2 style="text-align:center; margin-bottom:16px;">📝 Create Account</h2>
-        <p class="desc">Choose a username and password</p>
+        <p class="desc">Use your email and choose a password</p>
         <div class="input-group">
-            <input type="text" id="reg-username" placeholder="Username (3–20 chars)">
+            <input type="email" id="reg-email" placeholder="Your Email">
             <input type="password" id="reg-password" placeholder="Password (min 6 chars)">
             <input type="password" id="reg-password2" placeholder="Confirm Password">
             <button onclick="__REGISTER__()">✅ Create Account</button>
@@ -397,12 +397,10 @@
 
     <div id="forgot-form" class="card" style="display:none;">
         <h2 style="text-align:center; margin-bottom:16px;">🔑 Reset Password</h2>
-        <p class="desc">Enter your username to set a new password</p>
+        <p class="desc">Enter your email to receive reset instructions</p>
         <div class="input-group">
-            <input type="text" id="reset-username" placeholder="Your Username">
-            <input type="password" id="new-password" placeholder="New Password (min 6 chars)" style="display:none;">
-            <input type="password" id="new-password2" placeholder="Confirm New Password" style="display:none;">
-            <button id="reset-btn" onclick="__VERIFY_USER__()">Verify Username</button>
+            <input type="email" id="reset-email" placeholder="Your Email">
+            <button onclick="__RESET_PASSWORD__()">Send Reset Link</button>
         </div>
         <div id="reset-message" class="result" style="display:none;"></div>
         <div class="auth-toggle">
@@ -466,251 +464,236 @@
     </div>
 </div>
 
-<script>
-// --------------------------
-// 🔒 OBFUSCATED & PROTECTED CODE
-// --------------------------
-var _0x4e2f = ["\x6B\x65\x79\x43\x6F\x64\x65", "\x6B\x65\x79\x43\x6F\x64\x65", "\x63\x74\x72\x6C\x4B\x65\x79", "\x73\x68\x69\x66\x74\x4B\x65\x79", "\x61\x64\x64\x45\x76\x65\x6E\x74\x4C\x69\x73\x74\x65\x6E\x65\x72", "\x70\x72\x65\x76\x65\x6E\x74\x44\x65\x66\x61\x75\x6C\x74", "\x6C\x6F\x63\x61\x6C\x53\x74\x6F\x72\x61\x67\x65", "\x67\x65\x74\x49\x74\x65\x6D", "\x73\x65\x74\x49\x74\x65\x6D", "\x72\x65\x6D\x6F\x76\x65\x49\x74\x65\x6D", "\x67\x65\x74\x45\x6C\x65\x6D\x65\x6E\x74\x42\x79\x49\x64", "\x73\x68\x6F\x77", "\x68\x69\x64\x65", "\x63\x6C\x61\x73\x73\x4C\x69\x73\x74", "\x61\x64\x64", "\x72\x65\x6D\x6F\x76\x65", "\x74\x6F\x67\x67\x6C\x65"];
+<!-- Firebase Auth Setup -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 
-function __PROT_KEY__(_0x1a) {
-    const _0x2b = _0x1a[_0x4e2f[0]];
+  const firebaseConfig = {
+    apiKey: "AIzaSyC1C95RBp5YZwLMyis3zc02nxn80hToe2U",
+    authDomain: "xuid-ce0ec.firebaseapp.com",
+    projectId: "xuid-ce0ec",
+    storageBucket: "xuid-ce0ec.firebasestorage.app",
+    messagingSenderId: "386125149307",
+    appId: "1:386125149307:web:675ba0cd4af98911971ede"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  window.__PROT_KEY__ = function(_0x1a) {
+    const _0x2b = _0x1a.keyCode;
     if(_0x2b === 123 || 
-       (_0x1a[_0x4e2f[2]] && _0x1a[_0x4e2f[3]] && _0x2b === 73) || 
-       (_0x1a[_0x4e2f[2]] && _0x1a[_0x4e2f[3]] && _0x2b === 74) || 
-       (_0x1a[_0x4e2f[2]] && _0x2b === 85) || 
-       (_0x1a[_0x4e2f[2]] && _0x2b === 83) || 
-       (_0x1a[_0x4e2f[2]] && _0x2b === 80)) {
+       (_0x1a.ctrlKey && _0x1a.shiftKey && _0x2b === 73) || 
+       (_0x1a.ctrlKey && _0x1a.shiftKey && _0x2b === 74) || 
+       (_0x1a.ctrlKey && _0x2b === 85) || 
+       (_0x1a.ctrlKey && _0x2b === 83) || 
+       (_0x1a.ctrlKey && _0x2b === 80)) {
         return false;
     }
     return true;
-}
+  };
 
-document[_0x4e2f[4]]('\x64\x72\x61\x67\x73\x74\x61\x72\x74', _0x => _0x[_0x4e2f[5]]());
-document[_0x4e2f[4]]('\x64\x72\x6F\x70', _0x => _0x[_0x4e2f[5]]());
+  document.addEventListener('dragstart', _0x => _0x.preventDefault());
+  document.addEventListener('drop', _0x => _0x.preventDefault());
 
-(function(_0x3c) {
-    const _0x5d = _0x3c;
-    _0x5d['\x5F\x73\x65\x73\x73\x69\x6F\x6E'] = '\x78\x75\x69\x64\x54\x6F\x6F\x6C\x73\x41\x75\x74\x68';
-    _0x5d['\x5F\x75\x73\x65\x72'] = '\x78\x75\x69\x64\x54\x6F\x6F\x6C\x73\x55\x73\x65\x72\x6E\x61\x6D\x65';
-    _0x5d['\x5F\x64\x62'] = '\x78\x75\x69\x64\x54\x6F\x6F\x6C\x73\x55\x73\x65\x72\x73';
+  function _0xMsg(_0xc, _0xd, _0xe) {
+      _0xc.textContent = _0xd;
+      _0xc.className = _0xe ? 'result error' : 'result success';
+      _0xc.style.display = 'block';
+  }
 
-    async function _0xHash(_0x6e) {
-        const _0x7f = new TextEncoder();
-        const _0x8g = _0x7f.encode(_0x6e);
-        const _0x9h = await crypto.subtle.digest('SHA-256', _0x8g);
-        return Array.from(new Uint8Array(_0x9h)).map(_0x => _0x.toString(16).padStart(2, '0')).join('');
-    }
+  window.__SHOW_LOGIN__ = () => {
+      document.getElementById('login-form').style.display = 'block';
+      document.getElementById('register-form').style.display = 'none';
+      document.getElementById('forgot-form').style.display = 'none';
+      document.getElementById('auth-message').style.display = 'none';
+  };
 
-    function _0xGetDB() {
-        const _0xa = localStorage.getItem(_0x5d['\x5F\x64\x62']);
-        return _0xa ? JSON.parse(_0xa) : {};
-    }
+  window.__SHOW_REG__ = () => {
+      document.getElementById('login-form').style.display = 'none';
+      document.getElementById('register-form').style.display = 'block';
+      document.getElementById('reg-message').style.display = 'none';
+  };
 
-    function _0xSaveDB(_0xb) {
-        localStorage.setItem(_0x5d['\x5F\x64\x62'], JSON.stringify(_0xb));
-    }
+  window.__SHOW_FORGOT__ = () => {
+      document.getElementById('login-form').style.display = 'none';
+      document.getElementById('forgot-form').style.display = 'block';
+      document.getElementById('reset-message').style.display = 'none';
+  };
 
-    function _0xMsg(_0xc, _0xd, _0xe) {
-        _0xc.textContent = _0xd;
-        _0xc.className = _0xe ? 'result error' : 'result success';
-        _0xc.style.display = 'block';
-    }
+  // --- Firebase Auth Functions ---
+  window.__LOGIN__ = async () => {
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value.trim();
+      const msgEl = document.getElementById('auth-message');
+      if(!email || !password) return _0xMsg(msgEl, '⚠️ Fill in both fields', true);
+      try {
+          await signInWithEmailAndPassword(auth, email, password);
+      } catch(err) {
+          _0xMsg(msgEl, `❌ ${err.message}`, true);
+      }
+  };
 
-    window.__SHOW_LOGIN__ = () => {
-        document.getElementById('login-form').style.display = 'block';
-        document.getElementById('register-form').style.display = 'none';
-        document.getElementById('forgot-form').style.display = 'none';
-        document.getElementById('auth-message').style.display = 'none';
-    };
+  window.__REGISTER__ = async () => {
+      const email = document.getElementById('reg-email').value.trim();
+      const p1 = document.getElementById('reg-password').value.trim();
+      const p2 = document.getElementById('reg-password2').value.trim();
+      const msgEl = document.getElementById('reg-message');
+      if(!email) return _0xMsg(msgEl, '⚠️ Enter a valid email', true);
+      if(p1.length < 6) return _0xMsg(msgEl, '⚠️ Password must be at least 6 characters', true);
+      if(p1 !== p2) return _0xMsg(msgEl, '⚠️ Passwords do not match', true);
+      try {
+          await createUserWithEmailAndPassword(auth, email, p1);
+          _0xMsg(msgEl, '✅ Account created! Logging in...');
+      } catch(err) {
+          _0xMsg(msgEl, `❌ ${err.message}`, true);
+      }
+  };
 
-    window.__SHOW_REG__ = () => {
-        document.getElementById('login-form').style.display = 'none';
-        document.getElementById('register-form').style.display = 'block';
-        document.getElementById('reg-message').style.display = 'none';
-    };
+  window.__RESET_PASSWORD__ = async () => {
+      const email = document.getElementById('reset-email').value.trim();
+      const msgEl = document.getElementById('reset-message');
+      if(!email) return _0xMsg(msgEl, '⚠️ Enter your email', true);
+      try {
+          await sendPasswordResetEmail(auth, email);
+          _0xMsg(msgEl, '✅ Reset link sent! Check your inbox.');
+      } catch(err) {
+          _0xMsg(msgEl, `❌ ${err.message}`, true);
+      }
+  };
 
-    window.__SHOW_FORGOT__ = () => {
-        document.getElementById('login-form').style.display = 'none';
-        document.getElementById('forgot-form').style.display = 'block';
-        document.getElementById('reset-message').style.display = 'none';
-    };
+  window.__LOGOUT__ = async () => {
+      await signOut(auth);
+  };
 
-    window.__LOGIN__ = async () => {
-        const _0f = document.getElementById('login-username').value.trim();
-        const _0g = document.getElementById('login-password').value.trim();
-        const _0h = document.getElementById('auth-message');
-        if(!_0f || !_0g) return _0xMsg(_0h, '⚠️ Fill in both fields', true);
-        const _0i = _0xGetDB();
-        const _0j = _0i[_0f];
-        if(!_0j) return _0xMsg(_0h, '❌ Username not found', true);
-        const _0k = await _0xHash(_0g);
-        if(_0k !== _0j) return _0xMsg(_0h, '❌ Incorrect password', true);
-        localStorage.setItem(_0x5d['\x5F\x73\x65\x73\x73\x69\x6F\x6E'], 'true');
-        localStorage.setItem(_0x5d['\x5F\x75\x73\x65\x72'], _0f);
-        document.getElementById('auth-screen').style.display = 'none';
-        document.getElementById('app-content').style.display = 'block';
-        document.getElementById('current-user').textContent = `👤 ${_0f}`;
-    };
+  // --- Auth State Listener ---
+  onAuthStateChanged(auth, (user) => {
+      if (user) {
+          document.getElementById('auth-screen').style.display = 'none';
+          document.getElementById('app-content').style.display = 'block';
+          document.getElementById('current-user').textContent = `👤 ${user.email}`;
+      } else {
+          document.getElementById('auth-screen').style.display = 'flex';
+          document.getElementById('app-content').style.display = 'none';
+          __SHOW_LOGIN__();
+      }
+  });
 
-    window.__REGISTER__ = async () => {
-        const _0u = document.getElementById('reg-username').value.trim();
-        const _0p1 = document.getElementById('reg-password').value.trim();
-        const _0p2 = document.getElementById('reg-password2').value.trim();
-        const _0m = document.getElementById('reg-message');
-        if(_0u.length < 3 || _0u.length > 20) return _0xMsg(_0m, '⚠️ Username must be 3–20 characters', true);
-        if(_0p1.length < 6) return _0xMsg(_0m, '⚠️ Password must be at least 6 characters', true);
-        if(_0p1 !== _0p2) return _0xMsg(_0m, '⚠️ Passwords do not match', true);
-        const _0db = _0xGetDB();
-        if(_0db[_0u]) return _0xMsg(_0m, '❌ Username already taken', true);
-        _0db[_0u] = await _0xHash(_0p1);
-        _0xSaveDB(_0db);
-        _0xMsg(_0m, '✅ Account created! You can now sign in.');
-    };
+  // --- Existing Tools & UI Functions ---
+  window.__SWITCH_TAB__ = (_t) => {
+      document.querySelectorAll('.tab').forEach(_ => _.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(_ => _.style.display = 'none');
+      document.querySelector(`.tab[onclick="__SWITCH_TAB__('${_t}')"]`).classList.add('active');
+      document.getElementById(`${_t}-tab`).style.display = 'block';
+  };
 
-    window.__LOGOUT__ = () => {
-        localStorage.removeItem(_0x5d['\x5F\x73\x65\x73\x73\x69\x6F\x6E']);
-        localStorage.removeItem(_0x5d['\x5F\x75\x73\x65\x72']);
-        document.getElementById('auth-screen').style.display = 'flex';
-        document.getElementById('app-content').style.display = 'none';
-        __SHOW_LOGIN__();
-    };
+  window.__LOOKUP__ = async () => {
+      const _gt = document.getElementById('gamertag').value.trim();
+      const _res = document.getElementById('lookup-result');
+      const _txt = document.getElementById('lookup-text');
+      if(!_gt) return _txt.innerHTML = '⚠️ Enter a gamertag', _res.style.display = 'block', _res.className = 'result error';
+      _txt.innerHTML = '🔄 Searching...', _res.style.display = 'block', _res.className = 'result';
+      try {
+          const _r = await fetch(`https://api.geysermc.org/v2/xbox/xuid/${encodeURIComponent(_gt)}`);
+          const _d = await _r.json();
+          if(_d.xuid) {
+              const _h = BigInt(_d.xuid).toString(16).toUpperCase().padStart(16, '0');
+              const _u = `00000000-0000-0000-${_h.slice(0,4)}-${_h.slice(4)}`.toLowerCase();
+              _txt.innerHTML = `<span class="label">Gamertag</span><div class="value">${_gt}</div>
+              <span class="label">Decimal XUID</span><div class="value">${_d.xuid}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_d.xuid}');showCopy('Copied!')">Copy</button></div>
+              <span class="label">Hex XUID</span><div class="value">${_h}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_h}');showCopy('Copied!')">Copy</button></div>
+              <span class="label">Floodgate UUID</span><div class="value">${_u}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_u}');showCopy('Copied!')">Copy</button></div>`;
+              _res.className = 'result success';
+          } else {
+              _txt.innerHTML = '❌ Not found';
+              _res.className = 'result error';
+          }
+      } catch(_) {
+          _txt.innerHTML = '❌ Error connecting to API';
+          _res.className = 'result error';
+      }
+  };
 
-    window.__SWITCH_TAB__ = (_t) => {
-        document.querySelectorAll('.tab').forEach(_ => _.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(_ => _.style.display = 'none');
-        document.querySelector(`.tab[onclick="__SWITCH_TAB__('${_t}')"]`).classList.add('active');
-        document.getElementById(`${_t}-tab`).style.display = 'block';
-    };
+  window.__CONVERT__ = () => {
+      const _dec = document.getElementById('decimal-xuid').value.trim();
+      const _res = document.getElementById('convert-result');
+      const _txt = document.getElementById('convert-text');
+      if(!/^\d+$/.test(_dec)) return _txt.innerHTML = '⚠️ Enter valid decimal', _res.style.display = 'block', _res.className = 'result error';
+      try {
+          const _h = BigInt(_dec).toString(16).toUpperCase().padStart(16, '0');
+          const _u = `00000000-0000-0000-${_h.slice(0,4)}-${_h.slice(4)}`.toLowerCase();
+          _txt.innerHTML = `<span class="label">Decimal XUID</span><div class="value">${_dec}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_dec}');showCopy('Copied!')">Copy</button></div>
+          <span class="label">Hex XUID</span><div class="value">${_h}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_h}');showCopy('Copied!')">Copy</button></div>
+          <span class="label">Floodgate UUID</span><div class="value">${_u}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_u}');showCopy('Copied!')">Copy</button></div>`;
+          _res.style.display = 'block';
+          _res.className = 'result success';
+      } catch(_) {
+          _txt.innerHTML = '❌ Invalid number';
+          _res.className = 'result error';
+      }
+  };
 
-    window.__LOOKUP__ = async () => {
-        const _gt = document.getElementById('gamertag').value.trim();
-        const _res = document.getElementById('lookup-result');
-        const _txt = document.getElementById('lookup-text');
-        if(!_gt) return _txt.innerHTML = '⚠️ Enter a gamertag', _res.style.display = 'block', _res.className = 'result error';
-        _txt.innerHTML = '🔄 Searching...', _res.style.display = 'block', _res.className = 'result';
-        try {
-            const _r = await fetch(`https://api.geysermc.org/v2/xbox/xuid/${encodeURIComponent(_gt)}`);
-            const _d = await _r.json();
-            if(_d.xuid) {
-                const _h = BigInt(_d.xuid).toString(16).toUpperCase().padStart(16, '0');
-                const _u = `00000000-0000-0000-${_h.slice(0,4)}-${_h.slice(4)}`.toLowerCase();
-                _txt.innerHTML = `<span class="label">Gamertag</span><div class="value">${_gt}</div>
-                <span class="label">Decimal XUID</span><div class="value">${_d.xuid}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_d.xuid}')">Copy</button></div>
-                <span class="label">Hex XUID</span><div class="value">${_h}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_h}')">Copy</button></div>
-                <span class="label">Floodgate UUID</span><div class="value">${_u}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_u}')">Copy</button></div>`;
-                _res.className = 'result success';
-            } else {
-                _txt.innerHTML = '❌ Not found';
-                _res.className = 'result error';
-            }
-        } catch(_) {
-            _txt.innerHTML = '❌ Error connecting to API';
-            _res.className = 'result error';
-        }
-    };
+  window.__REVERSE_LOOKUP__ = async () => {
+      const _in = document.getElementById('reverse-input').value.trim();
+      const _res = document.getElementById('reverse-result');
+      const _txt = document.getElementById('reverse-text');
+      let _x = null;
+      if(/^\d+$/.test(_in)) _x = _in;
+      else if(/^[0-9A-Fa-f]{16}$/.test(_in)) _x = BigInt('0x'+_in).toString();
+      else if(/^00000000-0000-0000-([0-9A-Fa-f]{4})-([0-9A-Fa-f]{12})$/i.test(_in)) _x = BigInt('0x'+_in.replace(/-/g,'').slice(-12)).toString();
+      else return _txt.innerHTML = '❌ Invalid format', _res.style.display = 'block', _res.className = 'result error';
+      _txt.innerHTML = '🔄 Searching...', _res.style.display = 'block';
+      try {
+          const _r = await fetch(`https://api.geysermc.org/v2/xbox/gamertag/${_x}`);
+          const _d = await _r.json();
+          if(_d.gamertag) {
+              const _h = BigInt(_x).toString(16).toUpperCase().padStart(16, '0');
+              const _u = `00000000-0000-0000-${_h.slice(0,4)}-${_h.slice(4)}`.toLowerCase();
+              _txt.innerHTML = `<span class="label">Gamertag</span><div class="value">${_d.gamertag}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_d.gamertag}');showCopy('Copied!')">Copy</button></div>
+              <span class="label">Decimal XUID</span><div class="value">${_x}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_x}');showCopy('Copied!')">Copy</button></div>
+              <span class="label">Hex XUID</span><div class="value">${_h}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_h}');showCopy('Copied!')">Copy</button></div>
+              <span class="label">Floodgate UUID</span><div class="value">${_u}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_u}');showCopy('Copied!')">Copy</button></div>`;
+              _res.className = 'result success';
+          } else {
+              _txt.innerHTML = '❌ No gamertag found';
+              _res.className = 'result error';
+          }
+      } catch(_) {
+          _txt.innerHTML = '❌ API error';
+          _res.className = 'result error';
+      }
+  };
 
-    window.__CONVERT__ = () => {
-        const _dec = document.getElementById('decimal-xuid').value.trim();
-        const _res = document.getElementById('convert-result');
-        const _txt = document.getElementById('convert-text');
-        if(!/^\d+$/.test(_dec)) return _txt.innerHTML = '⚠️ Enter valid decimal', _res.style.display = 'block', _res.className = 'result error';
-        try {
-            const _h = BigInt(_dec).toString(16).toUpperCase().padStart(16, '0');
-            const _u = `00000000-0000-0000-${_h.slice(0,4)}-${_h.slice(4)}`.toLowerCase();
-            _txt.innerHTML = `<span class="label">Decimal XUID</span><div class="value">${_dec}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_dec}')">Copy</button></div>
-            <span class="label">Hex XUID</span><div class="value">${_h}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_h}')">Copy</button></div>
-            <span class="label">Floodgate UUID</span><div class="value">${_u}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_u}')">Copy</button></div>`;
-            _res.style.display = 'block';
-            _res.className = 'result success';
-        } catch(_) {
-            _txt.innerHTML = '❌ Invalid number';
-            _res.className = 'result error';
-        }
-    };
+  // --- Helper Functions ---
+  window.showCopy = function(text) {
+      const el = document.getElementById('copyNotification');
+      el.textContent = text;
+      el.classList.remove('error');
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 2000);
+  };
 
-    window.__REVERSE_LOOKUP__ = async () => {
-        const _in = document.getElementById('reverse-input').value.trim();
-        const _res = document.getElementById('reverse-result');
-        const _txt = document.getElementById('reverse-text');
-        let _x = null;
-        if(/^\d+$/.test(_in)) _x = _in;
-        else if(/^[0-9A-Fa-f]{16}$/.test(_in)) _x = BigInt('0x'+_in).toString();
-        else if(/^00000000-0000-0000-([0-9A-Fa-f]{4})-([0-9A-Fa-f]{12})$/i.test(_in)) _x = BigInt('0x'+_in.replace(/-/g,'').slice(-12)).toString();
-        else return _txt.innerHTML = '❌ Invalid format', _res.style.display = 'block', _res.className = 'result error';
-        _txt.innerHTML = '🔄 Searching...', _res.style.display = 'block';
-        try {
-            const _r = await fetch(`https://api.geysermc.org/v2/xbox/gamertag/${_x}`);
-            const _d = await _r.json();
-            if(_d.gamertag) {
-                const _h = BigInt(_x).toString(16).toUpperCase().padStart(16, '0');
-                const _u = `00000000-0000-0000-${_h.slice(0,4)}-${_h.slice(4)}`.toLowerCase();
-                _txt.innerHTML = `<span class="label">Gamertag</span><div class="value">${_d.gamertag}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_d.gamertag}')">Copy</button></div>
-                <span class="label">Decimal XUID</span><div class="value">${_x}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_x}')">Copy</button></div>
-                <span class="label">Hex XUID</span><div class="value">${_h}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_h}')">Copy</button></div>
-                <span class="label">Floodgate UUID</span><div class="value">${_u}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_u}')">Copy</button></div>`;
-                _res.className = 'result success';
-            } else {
-                _txt.innerHTML = '❌ No gamertag found';
-                _res.className = 'result error';
-            }
-        } catch(_) {
-            _txt.innerHTML = '❌ API error';
-            _res.className = 'result error';
-        }
-    };
+  document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('login-password').addEventListener('keydown', e => e.key === 'Enter' && __LOGIN__());
+      document.getElementById('reg-password2').addEventListener('keydown', e => e.key === 'Enter' && __REGISTER__());
+      document.getElementById('gamertag').addEventListener('keydown', e => e.key === 'Enter' && __LOOKUP__());
+      document.getElementById('decimal-xuid').addEventListener('keydown', e => e.key === 'Enter' && __CONVERT__());
+      document.getElementById('reverse-input').addEventListener('keydown', e => e.key === 'Enter' && __REVERSE_LOOKUP__());
 
-    window.__VERIFY_USER__ = () => {
-        const _u = document.getElementById('reset-username').value.trim();
-        const _m = document.getElementById('reset-message');
-        const _db = _0xGetDB();
-        if(!_u) return _0xMsg(_m, '⚠️ Enter username', true);
-        if(!_db[_u]) return _0xMsg(_m, '❌ Username not found', true);
-        document.getElementById('reset-username').style.display = 'none';
-        document.getElementById('new-password').style.display = 'block';
-        document.getElementById('new-password2').style.display = 'block';
-        document.getElementById('reset-btn').textContent = 'Update Password';
-        document.getElementById('reset-btn').onclick = async () => {
-            const _p1 = document.getElementById('new-password').value.trim();
-            const _p2 = document.getElementById('new-password2').value.trim();
-            if(_p1.length < 6) return _0xMsg(_m, '⚠️ Password min 6 chars', true);
-            if(_p1 !== _p2) return _0xMsg(_m, '⚠️ Passwords do not match', true);
-            _db[_u] = await _0xHash(_p1);
-            _0xSaveDB(_db);
-            _0xMsg(_m, '✅ Password updated!');
-            setTimeout(__SHOW_LOGIN__, 2500);
-        };
-    };
-
-    window.addEventListener('load', () => {
-        if(localStorage.getItem(_0x5d['\x5F\x73\x65\x73\x73\x69\x6F\x6E']) === 'true') {
-            const _user = localStorage.getItem(_0x5d['\x5F\x75\x73\x65\x72']);
-            document.getElementById('auth-screen').style.display = 'none';
-            document.getElementById('app-content').style.display = 'block';
-            document.getElementById('current-user').textContent = `👤 ${_user}`;
-        } else {
-            __SHOW_LOGIN__();
-        }
-    });
-
-    document.getElementById('login-password').addEventListener('keydown', _e => _e.key === 'Enter' && __LOGIN__());
-    document.getElementById('reg-password2').addEventListener('keydown', _e => _e.key === 'Enter' && __REGISTER__());
-    document.getElementById('reset-username').addEventListener('keydown', _e => _e.key === 'Enter' && __VERIFY_USER__());
-    document.getElementById('gamertag').addEventListener('keydown', _e => _e.key === 'Enter' && __LOOKUP__());
-    document.getElementById('decimal-xuid').addEventListener('keydown', _e => _e.key === 'Enter' && __CONVERT__());
-    document.getElementById('reverse-input').addEventListener('keydown', _e => _e.key === 'Enter' && __REVERSE_LOOKUP__());
-
-    const _theme = document.getElementById('themeToggle');
-    if(localStorage.getItem('theme') === 'dark' || window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.body.classList.add('dark-mode');
-        _theme.textContent = '☀️ Light Mode';
-    }
-    _theme.addEventListener('click', () => {
-        document.body.classList.toggle('dark-mode');
-        const _is = document.body.classList.contains('dark-mode');
-        _theme.textContent = _is ? '☀️ Light Mode' : '🌙 Dark Mode';
-        localStorage.setItem('theme', _is ? 'dark' : 'light');
-    });
-})({});
+      const _theme = document.getElementById('themeToggle');
+      if(localStorage.getItem('theme') === 'dark' || window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          document.body.classList.add('dark-mode');
+          _theme.textContent = '☀️ Light Mode';
+      }
+      _theme.addEventListener('click', () => {
+          document.body.classList.toggle('dark-mode');
+          const _is = document.body.classList.contains('dark-mode');
+          _theme.textContent = _is ? '☀️ Light Mode' : '🌙 Dark Mode';
+          localStorage.setItem('theme', _is ? 'dark' : 'light');
+      });
+  });
 </script>
+
 </body>
 </html>
