@@ -304,6 +304,7 @@
             flex-shrink: 0;
             transition: background 0.2s;
             cursor: pointer;
+            border: none;
         }
 
         .copy-btn:active {
@@ -359,22 +360,32 @@
         .history-item {
             background: var(--input-bg);
             border-radius: 8px;
-            padding: 12px;
+            padding: 14px;
             margin-bottom: 12px;
             border-left: 3px solid var(--accent);
         }
         .history-time {
             font-size: 0.8rem;
             color: var(--text-secondary);
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
         .history-gamertag {
             font-weight: 600;
-            margin-bottom: 4px;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
         }
-        .history-details {
+        .history-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 4px 0;
             font-size: 0.85rem;
-            color: var(--text-secondary);
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+        }
+        .history-row span {
+            flex: 1;
         }
     </style>
 </head>
@@ -444,14 +455,14 @@
     <div class="top-controls">
         <div id="current-user">Not logged in</div>
         <button id="themeToggle" class="control-btn">🌙 Dark Mode</button>
-        <button onclick="__LOGOUT__()" class="control-btn">🔐 Logout</button>
+        <button onclick="__LOGOUT__()" class="control-btn">🚪 Logout</button>
     </div>
 
     <div class="card">
         <div class="tabs">
             <button class="tab active" onclick="__SWITCH_TAB__('lookup')">Gamertag Lookup</button>
             <button class="tab" onclick="__SWITCH_TAB__('convert')">Manual Converter</button>
-            <button class="tab" onclick="__SWITCH_TAB__('history')">History</button>
+            <button class="tab" onclick="__SWITCH_TAB__('history')">📜 History</button>
         </div>
 
         <div id="lookup-tab" class="tab-content active">
@@ -476,7 +487,7 @@
             </div>
         </div>
 
-        <!-- Updated History Tab with Search -->
+        <!-- History Tab with Search & Copy Buttons -->
         <div id="history-tab" class="tab-content">
             <p class="desc">All past lookup results from all users</p>
             <div class="history-search">
@@ -688,10 +699,17 @@
           <div class="history-item">
               <div class="history-time">${item.time}</div>
               <div class="history-gamertag">${item.gamertag}</div>
-              <div class="history-details">
-                  XUID: ${item.xuid}<br>
-                  Hex: ${item.hex}<br>
-                  UUID: ${item.uuid}
+              <div class="history-row">
+                  <span>XUID: ${item.xuid}</span>
+                  <button class="copy-btn" onclick="navigator.clipboard.writeText('${item.xuid}');showCopy('XUID copied!')">Copy</button>
+              </div>
+              <div class="history-row">
+                  <span>Hex: ${item.hex}</span>
+                  <button class="copy-btn" onclick="navigator.clipboard.writeText('${item.hex}');showCopy('Hex copied!')">Copy</button>
+              </div>
+              <div class="history-row">
+                  <span>UUID: ${item.uuid}</span>
+                  <button class="copy-btn" onclick="navigator.clipboard.writeText('${item.uuid}');showCopy('UUID copied!')">Copy</button>
               </div>
           </div>`;
       });
