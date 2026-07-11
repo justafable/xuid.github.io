@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#2563eb">
-    <title>XUID Tools</title>
+    <meta name="theme-color" content="#FF0018">
+    <title>XUID Tools | Pride Edition 🏳️‍🌈</title>
     <style>
         * {
             box-sizing: border-box;
@@ -20,38 +20,65 @@
             user-select: none;
         }
 
+        /* Pride Rainbow Palette */
         :root {
-            --bg: #f5f7fa;
+            --pride-red: #FF0018;
+            --pride-orange: #FFA500;
+            --pride-yellow: #FFFF00;
+            --pride-green: #008000;
+            --pride-blue: #0000FF;
+            --pride-purple: #800080;
+            
+            --bg: #fff5f8;
             --card: #ffffff;
-            --text: #222222;
-            --text-secondary: #666666;
-            --border: #e5e7eb;
-            --input-bg: #f9fafb;
-            --accent: #2563eb;
-            --accent-hover: #1d4ed8;
+            --text: #2d2d2d;
+            --text-secondary: #6b7280;
+            --border: #fce7f3;
+            --input-bg: #fdf2f8;
+            --accent: var(--pride-red);
+            --accent-hover: var(--pride-purple);
             --success-bg: #f0fdf4;
-            --success-border: #bbf7d0;
-            --success-text: #166534;
+            --success-border: var(--pride-green);
+            --success-text: var(--pride-green);
             --error-bg: #fef2f2;
-            --error-border: #fecaca;
-            --error-text: #991b1b;
+            --error-border: var(--pride-red);
+            --error-text: var(--pride-red);
         }
 
+        /* Dark Mode Pride */
         .dark-mode {
-            --bg: #121212;
-            --card: #1e1e1e;
-            --text: #e5e7eb;
-            --text-secondary: #9ca3af;
-            --border: #374151;
-            --input-bg: #27272a;
-            --accent: #3b82f6;
-            --accent-hover: #2563eb;
+            --bg: #1a1018;
+            --card: #2b1d27;
+            --text: #fce7f3;
+            --text-secondary: #d1d5db;
+            --border: #4a2c42;
+            --input-bg: #3b2435;
+            --accent: var(--pride-orange);
+            --accent-hover: var(--pride-yellow);
             --success-bg: #162e22;
-            --success-border: #166534;
-            --success-text: #4ade80;
+            --success-border: var(--pride-green);
+            --success-text: #86efac;
             --error-bg: #2e1818;
-            --error-border: #991b1b;
-            --error-text: #f87171;
+            --error-border: var(--pride-red);
+            --error-text: #fca5a5;
+        }
+
+        /* Rainbow Top Border */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, 
+                var(--pride-red), 
+                var(--pride-orange), 
+                var(--pride-yellow), 
+                var(--pride-green), 
+                var(--pride-blue), 
+                var(--pride-purple));
+            z-index: 9999;
         }
 
         body {
@@ -68,7 +95,17 @@
             text-align: center;
             font-size: 1.6rem;
             margin-bottom: 24px;
-            color: var(--accent);
+            background: linear-gradient(90deg, 
+                var(--pride-red), 
+                var(--pride-orange), 
+                var(--pride-yellow), 
+                var(--pride-green), 
+                var(--pride-blue), 
+                var(--pride-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 700;
         }
 
         #auth-screen {
@@ -83,6 +120,14 @@
         #auth-screen .card {
             width: 100%;
             max-width: 400px;
+            border-top: 4px solid;
+            border-image: linear-gradient(90deg, 
+                var(--pride-red), 
+                var(--pride-orange), 
+                var(--pride-yellow), 
+                var(--pride-green), 
+                var(--pride-blue), 
+                var(--pride-purple)) 1;
         }
 
         .auth-toggle {
@@ -92,13 +137,14 @@
         }
 
         .auth-toggle a {
-            color: var(--accent);
+            color: var(--pride-purple);
             text-decoration: none;
             font-weight: 500;
             cursor: pointer;
         }
 
         .auth-toggle a:hover {
+            color: var(--pride-red);
             text-decoration: underline;
         }
 
@@ -124,11 +170,17 @@
         .control-btn {
             padding: 8px 12px;
             border-radius: 8px;
-            border: 1px solid var(--border);
+            border: 2px solid var(--pride-purple);
             background: var(--input-bg);
             color: var(--text);
             font-size: 0.9rem;
             cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .control-btn:hover {
+            border-color: var(--pride-red);
+            background: rgba(128, 0, 128, 0.05);
         }
 
         /* --- Smaller Logout button --- */
@@ -144,6 +196,7 @@
         }
         .logout-btn:hover {
             opacity: 0.85;
+            background: rgba(255, 0, 24, 0.1);
         }
 
         .reset-lang-btn {
@@ -172,12 +225,13 @@
             border-radius: 16px;
             padding: 20px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border: 1px solid var(--border);
         }
 
         .tabs {
             display: flex;
             margin-bottom: 20px;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 2px solid var(--border);
             gap: 8px;
             flex-wrap: wrap;
         }
@@ -197,9 +251,13 @@
         }
 
         .tab.active {
-            border-bottom-color: var(--accent);
-            color: var(--accent);
+            border-bottom-color: var(--pride-red);
+            color: var(--pride-purple);
             font-weight: 600;
+        }
+
+        .tab:hover:not(.active) {
+            color: var(--pride-blue);
         }
 
         .tab-content {
@@ -227,7 +285,7 @@
             width: 100%;
             padding: 14px 16px;
             background: var(--input-bg);
-            border: 1px solid var(--border);
+            border: 2px solid var(--border);
             border-radius: 12px;
             color: var(--text);
             font-size: 1rem;
@@ -235,18 +293,19 @@
             -moz-user-select: text;
             -ms-user-select: text;
             user-select: text;
+            transition: border-color 0.2s;
         }
 
         input:focus {
             outline: none;
-            border-color: var(--accent);
+            border-color: var(--pride-purple);
             background: var(--card);
         }
 
         button {
             width: 100%;
             padding: 14px;
-            background: var(--accent);
+            background: linear-gradient(90deg, var(--pride-red), var(--pride-purple));
             color: white;
             border: none;
             border-radius: 12px;
@@ -254,11 +313,17 @@
             font-weight: 500;
             cursor: pointer;
             touch-action: manipulation;
-            transition: background 0.2s;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(128, 0, 128, 0.2);
+        }
+
+        button:hover {
+            background: linear-gradient(90deg, var(--pride-purple), var(--pride-red));
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 0, 24, 0.3);
         }
 
         button:active {
-            background: var(--accent-hover);
             transform: scale(0.98);
         }
 
@@ -269,17 +334,18 @@
             display: none;
             font-size: 0.95rem;
             line-height: 1.5;
+            border-left: 4px solid;
         }
 
         .result.success {
             background: var(--success-bg);
-            border: 1px solid var(--success-border);
+            border-color: var(--pride-green);
             color: var(--success-text);
         }
 
         .result.error {
             background: var(--error-bg);
-            border: 1px solid var(--error-border);
+            border-color: var(--pride-red);
             color: var(--error-text);
         }
 
@@ -296,6 +362,7 @@
             margin-bottom: 4px;
             display: block;
             font-size: 0.9rem;
+            color: var(--pride-purple);
         }
 
         .value {
@@ -303,6 +370,7 @@
             background: var(--input-bg);
             padding: 12px;
             border-radius: 8px;
+            border-left: 3px solid var(--pride-blue);
             word-break: break-all;
             font-size: 0.9rem;
             display: flex;
@@ -323,14 +391,18 @@
             border-radius: 6px;
             font-size: 0.75rem;
             flex-shrink: 0;
-            transition: background 0.2s;
+            transition: all 0.2s;
             cursor: pointer;
             border: none;
         }
 
-        .copy-btn:active {
-            background: var(--accent);
+        .copy-btn:hover {
+            background: var(--pride-purple);
             color: white;
+        }
+
+        .copy-btn:active {
+            background: var(--pride-red);
         }
 
         .copy-notification {
@@ -340,7 +412,7 @@
             transform: translateX(-50%) translateY(20px);
             background: var(--success-bg);
             color: var(--success-text);
-            border: 1px solid var(--success-border);
+            border: 2px solid var(--pride-green);
             padding: 12px 24px;
             border-radius: 8px;
             font-size: 0.95rem;
@@ -357,7 +429,7 @@
         .copy-notification.error {
             background: var(--error-bg);
             color: var(--error-text);
-            border-color: var(--error-border);
+            border-color: var(--pride-red);
         }
 
         .copy-notification.show {
@@ -368,10 +440,11 @@
         #current-user {
             font-size: 0.9rem;
             font-weight: 500;
-            color: var(--accent);
+            color: var(--pride-purple);
             background: var(--input-bg);
             padding: 6px 10px;
             border-radius: 6px;
+            border: 1px solid var(--pride-blue);
         }
 
         /* --- History Tab Styles --- */
@@ -383,7 +456,14 @@
             border-radius: 8px;
             padding: 14px;
             margin-bottom: 12px;
-            border-left: 3px solid var(--accent);
+            border-left: 4px solid;
+            border-image: linear-gradient(180deg, 
+                var(--pride-red), 
+                var(--pride-orange), 
+                var(--pride-yellow), 
+                var(--pride-green), 
+                var(--pride-blue), 
+                var(--pride-purple)) 1;
         }
         .history-time {
             font-size: 0.8rem;
@@ -394,6 +474,7 @@
             font-weight: 600;
             margin-bottom: 8px;
             font-size: 0.95rem;
+            color: var(--pride-red);
         }
         .history-row {
             display: flex;
@@ -420,6 +501,7 @@
         <a href="link">
             <img src="https://cdn.discordapp.com/icons/1353430789806751855/c196ff4cec0bbbb5b21fed72db83e895.png" alt="Logo" align="center">
         </a>
+        <h1>XUID Tools 🏳️‍🌈</h1>
     </div>
 
     <div id="login-form" class="card">
@@ -471,6 +553,7 @@
         <a href="link">
             <img src="https://cdn.discordapp.com/icons/1353430789806751855/c196ff4cec0bbbb5b21fed72db83e895.png" alt="Logo" align="center">
         </a>
+        <h1>XUID Tools 🏳️‍🌈</h1>
     </div>
 
     <div class="top-controls">
