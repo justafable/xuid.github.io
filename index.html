@@ -115,6 +115,12 @@
             flex-wrap: wrap;
         }
 
+        .user-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         .control-btn {
             padding: 8px 12px;
             border-radius: 8px;
@@ -123,6 +129,21 @@
             color: var(--text);
             font-size: 0.9rem;
             cursor: pointer;
+        }
+
+        /* --- Smaller Logout button --- */
+        .logout-btn {
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            border-radius: 6px;
+            background: var(--error-bg);
+            color: var(--error-text);
+            border: 1px solid var(--error-border);
+            /* Hidden by default */
+            display: none;
+        }
+        .logout-btn:hover {
+            opacity: 0.85;
         }
 
         .reset-lang-btn {
@@ -453,9 +474,12 @@
     </div>
 
     <div class="top-controls">
-        <div id="current-user">Not logged in</div>
+        <!-- User + Logout only visible when logged in -->
+        <div class="user-area">
+            <div id="current-user">Not logged in</div>
+            <button onclick="__LOGOUT__()" id="logoutBtn" class="control-btn logout-btn">🚪 Logout</button>
+        </div>
         <button id="themeToggle" class="control-btn">🌙 Dark Mode</button>
-        <button onclick="__LOGOUT__()" class="control-btn">🚪 Logout</button>
     </div>
 
     <div class="card">
@@ -610,14 +634,18 @@
 
   // --- Auth State Listener ---
   onAuthStateChanged(auth, (user) => {
+      const logoutBtn = document.getElementById('logoutBtn');
       if (user) {
           document.getElementById('auth-screen').style.display = 'none';
           document.getElementById('app-content').style.display = 'block';
           document.getElementById('current-user').textContent = `👤 ${user.email}`;
+          // Show logout button when logged in
+          logoutBtn.style.display = 'inline-block';
           loadHistory(); // Load history when user logs in
       } else {
           document.getElementById('auth-screen').style.display = 'flex';
           document.getElementById('app-content').style.display = 'none';
+          logoutBtn.style.display = 'none'; // Hide when logged out
           __SHOW_LOGIN__();
       }
   });
