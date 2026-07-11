@@ -351,6 +351,28 @@
             padding: 6px 10px;
             border-radius: 6px;
         }
+
+        /* --- History Tab Styles --- */
+        .history-item {
+            background: var(--input-bg);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-left: 3px solid var(--accent);
+        }
+        .history-time {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+        .history-gamertag {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .history-details {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
     </style>
 </head>
 <body oncontextmenu="return false;" onkeydown="return __PROT_KEY__(event);">
@@ -426,6 +448,7 @@
         <div class="tabs">
             <button class="tab active" onclick="__SWITCH_TAB__('lookup')">Gamertag Lookup</button>
             <button class="tab" onclick="__SWITCH_TAB__('convert')">Manual Converter</button>
+            <button class="tab" onclick="__SWITCH_TAB__('history')">📜 History</button>
         </div>
 
         <div id="lookup-tab" class="tab-content active">
@@ -449,13 +472,22 @@
                 <div id="convert-text"></div>
             </div>
         </div>
+
+        <!-- New History Tab -->
+        <div id="history-tab" class="tab-content">
+            <p class="desc">All past lookup results from all users</p>
+            <div id="history-content">
+                <p style="color: var(--text-secondary); text-align: center; padding: 20px;">Loading history...</p>
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- Firebase Auth Setup -->
+<!-- Firebase Auth + Firestore Setup -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+  import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyC1C95RBp5YZwLMyis3zc02nxn80hToe2U",
@@ -468,6 +500,7 @@
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
+  const db = getFirestore(app);
 
   window.__PROT_KEY__ = function(_0x1a) {
     const _0x2b = _0x1a.keyCode;
@@ -561,6 +594,7 @@
           document.getElementById('auth-screen').style.display = 'none';
           document.getElementById('app-content').style.display = 'block';
           document.getElementById('current-user').textContent = `👤 ${user.email}`;
+          loadHistory(); // Load history when user logs in
       } else {
           document.getElementById('auth-screen').style.display = 'flex';
           document.getElementById('app-content').style.display = 'none';
@@ -568,14 +602,65 @@
       }
   });
 
-  // --- Existing Tools & UI Functions ---
+  // --- Tab Switch ---
   window.__SWITCH_TAB__ = (_t) => {
       document.querySelectorAll('.tab').forEach(_ => _.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(_ => _.style.display = 'none');
       document.querySelector(`.tab[onclick="__SWITCH_TAB__('${_t}')"]`).classList.add('active');
       document.getElementById(`${_t}-tab`).style.display = 'block';
+
+      // Refresh history when tab is opened
+      if (_t === 'history') loadHistory();
   };
 
+  // --- Save lookup result to Firestore ---
+  async function saveToHistory(data) {
+      try {
+          await addDoc(collection(db, "lookup_history"), {
+              gamertag: data.gamertag,
+              xuid: data.xuid,
+              hex: data.hex,
+              uuid: data.uuid,
+              timestamp: serverTimestamp()
+          });
+      } catch (err) {
+          console.warn("Could not save to history:", err);
+      }
+  }
+
+  // --- Load all history from Firestore ---
+  async function loadHistory() {
+      const container = document.getElementById('history-content');
+      try {
+          const q = query(collection(db, "lookup_history"), orderBy("timestamp", "desc"), limit(50));
+          const snapshot = await getDocs(q);
+          if (snapshot.empty) {
+              container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 20px;">No lookup history yet.</p>`;
+              return;
+          }
+          let html = "";
+          snapshot.forEach(doc => {
+              const d = doc.data();
+              const time = d.timestamp ? new Date(d.timestamp.toDate()).toLocaleString() : "Unknown time";
+              html += `
+              <div class="history-item">
+                  <div class="history-time">${time}</div>
+                  <div class="history-gamertag">${d.gamertag}</div>
+                  <div class="history-details">
+                      XUID: ${d.xuid}<br>
+                      Hex: ${d.hex}<br>
+                      UUID: ${d.uuid}
+                  </div>
+              </div>`;
+          });
+          container.innerHTML = html;
+      } catch (err) {
+          container.innerHTML = `<p style="color: var(--error-text); text-align: center; padding: 20px;">⚠️ Could not load history.</p>`;
+          console.error(err);
+      }
+  }
+
+  // --- Lookup Function ---
   window.__LOOKUP__ = async () => {
       const _gt = document.getElementById('gamertag').value.trim();
       const _res = document.getElementById('lookup-result');
@@ -593,6 +678,9 @@
               <span class="label">Hex XUID</span><div class="value">${_h}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_h}');showCopy('Copied!')">Copy</button></div>
               <span class="label">Floodgate UUID</span><div class="value">${_u}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_u}');showCopy('Copied!')">Copy</button></div>`;
               _res.className = 'result success';
+
+              // Save result to history
+              await saveToHistory({ gamertag: _gt, xuid: _d.xuid, hex: _h, uuid: _u });
           } else {
               _txt.innerHTML = '❌ Not found';
               _res.className = 'result error';
@@ -603,6 +691,7 @@
       }
   };
 
+  // --- Converter Function ---
   window.__CONVERT__ = () => {
       const _dec = document.getElementById('decimal-xuid').value.trim();
       const _res = document.getElementById('convert-result');
