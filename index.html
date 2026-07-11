@@ -60,6 +60,11 @@
             max-width: 100%;
             top: 0 !important;
             position: relative;
+            /* Prevent text selection */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
 
         h1 {
@@ -176,6 +181,11 @@
             border-radius: 12px;
             color: var(--text);
             font-size: 1rem;
+            /* Allow selection inside inputs */
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
         }
 
         input:focus {
@@ -248,6 +258,11 @@
             align-items: center;
             justify-content: space-between;
             gap: 8px;
+            /* Allow selection for copy */
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
         }
 
         .copy-btn {
@@ -343,7 +358,7 @@
         }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false" onkeydown="disableDevToolsKeys(event)">
 
 <!-- Hidden Google Translate Container -->
 <div id="google_translate_element"></div>
@@ -408,6 +423,21 @@
 </div>
 
 <script>
+// --------------------------
+// Disable Right Click & Dev Tools Shortcuts
+// --------------------------
+function disableDevToolsKeys(e) {
+    // Block F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+    if (
+        e.key === 'F12' ||
+        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'i' || e.key === 'j')) ||
+        (e.ctrlKey && (e.key === 'U' || e.key === 'u'))
+    ) {
+        e.preventDefault();
+        return false;
+    }
+}
+
 // --------------------------
 // Light / Dark Mode Toggle
 // --------------------------
