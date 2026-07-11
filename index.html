@@ -353,6 +353,9 @@
         }
 
         /* --- History Tab Styles --- */
+        .history-search {
+            margin-bottom: 16px;
+        }
         .history-item {
             background: var(--input-bg);
             border-radius: 8px;
@@ -441,14 +444,14 @@
     <div class="top-controls">
         <div id="current-user">Not logged in</div>
         <button id="themeToggle" class="control-btn">🌙 Dark Mode</button>
-        <button onclick="__LOGOUT__()" class="control-btn">🔐 Logout</button>
+        <button onclick="__LOGOUT__()" class="control-btn">🚪 Logout</button>
     </div>
 
     <div class="card">
         <div class="tabs">
             <button class="tab active" onclick="__SWITCH_TAB__('lookup')">Gamertag Lookup</button>
             <button class="tab" onclick="__SWITCH_TAB__('convert')">Manual Converter</button>
-            <button class="tab" onclick="__SWITCH_TAB__('history')">History</button>
+            <button class="tab" onclick="__SWITCH_TAB__('history')">📜 History</button>
         </div>
 
         <div id="lookup-tab" class="tab-content active">
@@ -473,9 +476,12 @@
             </div>
         </div>
 
-        <!-- New History Tab -->
+        <!-- Updated History Tab with Search -->
         <div id="history-tab" class="tab-content">
             <p class="desc">All past lookup results from all users</p>
+            <div class="history-search">
+                <input type="text" id="history-search-input" placeholder="🔍 Search by Gamertag, XUID, Hex or UUID..." oninput="filterHistory()">
+            </div>
             <div id="history-content">
                 <p style="color: var(--text-secondary); text-align: center; padding: 20px;">Loading history...</p>
             </div>
@@ -501,6 +507,8 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
+
+  let allHistoryData = []; // Store full history for filtering
 
   window.__PROT_KEY__ = function(_0x1a) {
     const _0x2b = _0x1a.keyCode;
@@ -586,6 +594,7 @@
 
   window.__LOGOUT__ = async () => {
       await signOut(auth);
+      allHistoryData = []; // Clear data on logout
   };
 
   // --- Auth State Listener ---
@@ -610,7 +619,10 @@
       document.getElementById(`${_t}-tab`).style.display = 'block';
 
       // Refresh history when tab is opened
-      if (_t === 'history') loadHistory();
+      if (_t === 'history') {
+          document.getElementById('history-search-input').value = '';
+          filterHistory();
+      }
   };
 
   // --- Save lookup result to Firestore ---
@@ -632,33 +644,59 @@
   async function loadHistory() {
       const container = document.getElementById('history-content');
       try {
-          const q = query(collection(db, "lookup_history"), orderBy("timestamp", "desc"), limit(50));
+          const q = query(collection(db, "lookup_history"), orderBy("timestamp", "desc"), limit(100));
           const snapshot = await getDocs(q);
+          allHistoryData = [];
           if (snapshot.empty) {
               container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 20px;">No lookup history yet.</p>`;
               return;
           }
-          let html = "";
           snapshot.forEach(doc => {
               const d = doc.data();
               const time = d.timestamp ? new Date(d.timestamp.toDate()).toLocaleString() : "Unknown time";
-              html += `
-              <div class="history-item">
-                  <div class="history-time">${time}</div>
-                  <div class="history-gamertag">${d.gamertag}</div>
-                  <div class="history-details">
-                      XUID: ${d.xuid}<br>
-                      Hex: ${d.hex}<br>
-                      UUID: ${d.uuid}
-                  </div>
-              </div>`;
+              allHistoryData.push({ ...d, time });
           });
-          container.innerHTML = html;
+          filterHistory(); // Show all results initially
       } catch (err) {
           container.innerHTML = `<p style="color: var(--error-text); text-align: center; padding: 20px;">⚠️ Could not load history.</p>`;
           console.error(err);
       }
   }
+
+  // --- Filter history based on search input ---
+  window.filterHistory = function() {
+      const searchTerm = document.getElementById('history-search-input').value.trim().toLowerCase();
+      const container = document.getElementById('history-content');
+      
+      if (allHistoryData.length === 0) return;
+
+      const filtered = allHistoryData.filter(item => 
+          item.gamertag.toLowerCase().includes(searchTerm) ||
+          item.xuid.includes(searchTerm) ||
+          item.hex.toLowerCase().includes(searchTerm) ||
+          item.uuid.toLowerCase().includes(searchTerm)
+      );
+
+      if (filtered.length === 0) {
+          container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 20px;">No results match your search.</p>`;
+          return;
+      }
+
+      let html = "";
+      filtered.forEach(item => {
+          html += `
+          <div class="history-item">
+              <div class="history-time">${item.time}</div>
+              <div class="history-gamertag">${item.gamertag}</div>
+              <div class="history-details">
+                  XUID: ${item.xuid}<br>
+                  Hex: ${item.hex}<br>
+                  UUID: ${item.uuid}
+              </div>
+          </div>`;
+      });
+      container.innerHTML = html;
+  };
 
   // --- Lookup Function ---
   window.__LOOKUP__ = async () => {
