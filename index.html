@@ -131,7 +131,6 @@
             cursor: pointer;
         }
 
-        /* --- Smaller Logout button --- */
         .logout-btn {
             padding: 4px 8px;
             font-size: 0.75rem;
@@ -139,7 +138,6 @@
             background: var(--error-bg);
             color: var(--error-text);
             border: 1px solid var(--error-border);
-            /* Hidden by default */
             display: none;
         }
         .logout-btn:hover {
@@ -374,7 +372,6 @@
             border-radius: 6px;
         }
 
-        /* --- History Tab Styles --- */
         .history-search {
             margin-bottom: 16px;
         }
@@ -439,11 +436,11 @@
 
     <div id="register-form" class="card" style="display:none;">
         <h2 style="text-align:center; margin-bottom:16px;">📝 Create Account</h2>
-        <p class="desc">Choose a Username or use your Email. A recovery email is required for username accounts.</p>
+        <p class="desc">Choose a Username OR use your Email. Recovery email required for usernames.</p>
         <div class="input-group">
             <input type="text" id="reg-username" placeholder="Username (3-20 chars, letters/numbers/_)">
             <input type="email" id="reg-email" placeholder="Email (use this instead of username)">
-            <input type="email" id="reg-recovery-email" placeholder="Recovery Email (required if using username)">
+            <input type="email" id="reg-recovery-email" placeholder="Recovery Email (only if using username)">
             <input type="password" id="reg-password" placeholder="Password (min 6 chars)">
             <input type="password" id="reg-password2" placeholder="Confirm Password">
             <button onclick="__REGISTER__()">✅ Create Account</button>
@@ -513,7 +510,7 @@
         </div>
 
         <div id="history-tab" class="tab-content">
-            <p class="desc">All past lookup results from all users</p>
+            <p class="desc">All past lookup results</p>
             <div class="history-search">
                 <input type="text" id="history-search-input" placeholder="🔍 Search by Gamertag, XUID, Hex or UUID..." oninput="filterHistory()">
             </div>
@@ -543,30 +540,27 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  const APP_INTERNAL_DOMAIN = "@xuid-tools.local"; // Used for username accounts
+  const APP_INTERNAL_DOMAIN = "@xuid-tools.local";
   let allHistoryData = [];
-  let currentUsername = "";
 
-  window.__PROT_KEY__ = function(_0x1a) {
-    const _0x2b = _0x1a.keyCode;
-    if(_0x2b === 123 || 
-       (_0x1a.ctrlKey && _0x1a.shiftKey && _0x2b === 73) || 
-       (_0x1a.ctrlKey && _0x1a.shiftKey && _0x2b === 74) || 
-       (_0x1a.ctrlKey && _0x2b === 85) || 
-       (_0x1a.ctrlKey && _0x2b === 83) || 
-       (_0x1a.ctrlKey && _0x2b === 80)) {
-        return false;
-    }
+  window.__PROT_KEY__ = function(e) {
+    const key = e.keyCode;
+    if(key === 123 || 
+       (e.ctrlKey && e.shiftKey && key === 73) || 
+       (e.ctrlKey && e.shiftKey && key === 74) || 
+       (e.ctrlKey && key === 85) || 
+       (e.ctrlKey && key === 83) || 
+       (e.ctrlKey && key === 80)) return false;
     return true;
   };
 
-  document.addEventListener('dragstart', _0x => _0x.preventDefault());
-  document.addEventListener('drop', _0x => _0x.preventDefault());
+  document.addEventListener('dragstart', e => e.preventDefault());
+  document.addEventListener('drop', e => e.preventDefault());
 
-  function _0xMsg(_0xc, _0xd, _0xe) {
-      _0xc.textContent = _0xd;
-      _0xc.className = _0xe ? 'result error' : 'result success';
-      _0xc.style.display = 'block';
+  function _0xMsg(el, text, isError) {
+      el.textContent = text;
+      el.className = isError ? 'result error' : 'result success';
+      el.style.display = 'block';
   }
 
   window.__SHOW_LOGIN__ = () => {
@@ -588,27 +582,21 @@
       document.getElementById('reset-message').style.display = 'none';
   };
 
-  // --- Helper: Check if string is valid email ---
+  // --- Check if string is valid email ---
   function isEmail(str) {
-      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(str);
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(str.trim());
   }
 
-  // --- Helper: Find user data by username or email ---
+  // --- Find user: first try by username, then by email ---
   async function findUserByIdentifier(identifier) {
-      const q = query(collection(db, "users"), 
-          where("username", "==", identifier.toLowerCase()),
-          where("email", "==", identifier)
-      );
-      const snap = await getDocs(q);
+      const id = identifier.trim().toLowerCase();
+      let q = query(collection(db, "users"), where("username", "==", id));
+      let snap = await getDocs(q);
       if (!snap.empty) return snap.docs[0].data();
 
-      const byUsername = query(collection(db, "users"), where("username", "==", identifier.toLowerCase()));
-      const snapU = await getDocs(byUsername);
-      if (!snapU.empty) return snapU.docs[0].data();
-
-      const byEmail = query(collection(db, "users"), where("email", "==", identifier));
-      const snapE = await getDocs(byEmail);
-      if (!snapE.empty) return snapE.docs[0].data();
+      q = query(collection(db, "users"), where("email", "==", id));
+      snap = await getDocs(q);
+      if (!snap.empty) return snap.docs[0].data();
 
       return null;
   }
@@ -616,49 +604,52 @@
   // --- Register ---
   window.__REGISTER__ = async () => {
       const username = document.getElementById('reg-username').value.trim().toLowerCase();
-      const email = document.getElementById('reg-email').value.trim();
-      const recoveryEmail = document.getElementById('reg-recovery-email').value.trim();
+      const email = document.getElementById('reg-email').value.trim().toLowerCase();
+      const recoveryEmail = document.getElementById('reg-recovery-email').value.trim().toLowerCase();
       const p1 = document.getElementById('reg-password').value.trim();
       const p2 = document.getElementById('reg-password2').value.trim();
       const msgEl = document.getElementById('reg-message');
 
-      if (!username && !email) return _0xMsg(msgEl, '⚠️ Enter a username or email', true);
+      // Basic validation
+      if (!username && !email) return _0xMsg(msgEl, '⚠️ Enter a username OR email', true);
+      if (username && email) return _0xMsg(msgEl, '⚠️ Use only username OR only email, not both', true);
       if (username && !/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
           return _0xMsg(msgEl, '⚠️ Username: 3-20 chars, letters/numbers/_ only', true);
       }
       if (username && !recoveryEmail) {
-          return _0xMsg(msgEl, '⚠️ You must provide a recovery email when using a username', true);
+          return _0xMsg(msgEl, '⚠️ Recovery email is required when using username', true);
       }
       if (recoveryEmail && !isEmail(recoveryEmail)) {
           return _0xMsg(msgEl, '⚠️ Enter a valid recovery email', true);
       }
+      if (email && !isEmail(email)) {
+          return _0xMsg(msgEl, '⚠️ Enter a valid email address', true);
+      }
       if (p1.length < 6) return _0xMsg(msgEl, '⚠️ Password must be at least 6 characters', true);
       if (p1 !== p2) return _0xMsg(msgEl, '⚠️ Passwords do not match', true);
 
-      let finalEmail = email;
-      let isUsernameAccount = false;
-
-      if (!email && username) {
-          finalEmail = `${username}${APP_INTERNAL_DOMAIN}`;
-          isUsernameAccount = true;
-      } else if (!isEmail(finalEmail)) {
-          return _0xMsg(msgEl, '⚠️ Invalid email format', true);
-      }
-
       try {
-          // Check if username or email already exists
+          // Check for duplicate
           const existing = await findUserByIdentifier(username || email);
-          if (existing) return _0xMsg(msgEl, '⚠️ Username or email already in use', true);
+          if (existing) return _0xMsg(msgEl, '⚠️ Username or email already taken', true);
 
-          // Create Firebase user
+          let finalEmail = email;
+          let isUsernameAccount = false;
+
+          if (username) {
+              finalEmail = `${username}${APP_INTERNAL_DOMAIN}`;
+              isUsernameAccount = true;
+          }
+
+          // Create Firebase Auth user
           const userCred = await createUserWithEmailAndPassword(auth, finalEmail, p1);
 
-          // Set recovery email as the main contact for username accounts
-          if (isUsernameAccount && recoveryEmail) {
+          // Update to real recovery email for username accounts
+          if (isUsernameAccount) {
               await updateEmail(userCred.user, recoveryEmail);
           }
 
-          // Save user details to Firestore
+          // Save to Firestore
           await addDoc(collection(db, "users"), {
               uid: userCred.user.uid,
               username: username || null,
@@ -667,9 +658,11 @@
               isUsernameAccount
           });
 
-          _0xMsg(msgEl, '✅ Account created! Logging in...');
-      } catch(err) {
-          _0xMsg(msgEl, `❌ ${err.message}`, true);
+          _0xMsg(msgEl, '✅ Account created! Logging you in...', false);
+
+      } catch (err) {
+          console.error(err);
+          _0xMsg(msgEl, `❌ ${err.message.replace("Firebase: ", "")}`, true);
       }
   };
 
@@ -685,9 +678,9 @@
           const userData = await findUserByIdentifier(identifier);
           if (!userData) return _0xMsg(msgEl, '❌ Username or email not found', true);
 
-          await signInWithEmailAndPassword(auth, userData.email, password);
-      } catch(err) {
-          _0xMsg(msgEl, `❌ ${err.message}`, true);
+          await signInWithEmailAndPassword(auth, userData.isUsernameAccount ? userData.recoveryEmail : userData.email, password);
+      } catch (err) {
+          _0xMsg(msgEl, `❌ ${err.message.replace("Firebase: ", "")}`, true);
       }
   };
 
@@ -700,22 +693,21 @@
 
       try {
           const userData = await findUserByIdentifier(identifier);
-          if (!userData) return _0xMsg(msgEl, '❌ No account found with that username or email', true);
+          if (!userData) return _0xMsg(msgEl, '❌ No account found', true);
 
-          // Send reset link to recovery email for username accounts
           const targetEmail = userData.recoveryEmail || userData.email;
           await sendPasswordResetEmail(auth, targetEmail);
 
-          _0xMsg(msgEl, `✅ Reset link sent to ${targetEmail}. Check your inbox.`);
-      } catch(err) {
-          _0xMsg(msgEl, `❌ ${err.message}`, true);
+          _0xMsg(msgEl, `✅ Reset link sent to: ${targetEmail}`, false);
+      } catch (err) {
+          _0xMsg(msgEl, `❌ ${err.message.replace("Firebase: ", "")}`, true);
       }
   };
 
   window.__LOGOUT__ = async () => {
       await signOut(auth);
       allHistoryData = [];
-      currentUsername = "";
+      __SHOW_LOGIN__();
   };
 
   // --- Auth State Listener ---
@@ -723,13 +715,11 @@
       const logoutBtn = document.getElementById('logoutBtn');
       if (user) {
           const userData = await findUserByIdentifier(user.email);
-          if (userData) {
-              currentUsername = userData.username || "";
-              document.getElementById('current-user').textContent = `👤 ${currentUsername || user.email}`;
+          if (userData && userData.username) {
+              document.getElementById('current-user').textContent = `👤 ${userData.username}`;
           } else {
               document.getElementById('current-user').textContent = `👤 ${user.email}`;
           }
-
           document.getElementById('auth-screen').style.display = 'none';
           document.getElementById('app-content').style.display = 'block';
           logoutBtn.style.display = 'inline-block';
@@ -738,24 +728,17 @@
           document.getElementById('auth-screen').style.display = 'flex';
           document.getElementById('app-content').style.display = 'none';
           logoutBtn.style.display = 'none';
-          __SHOW_LOGIN__();
       }
   });
 
-  // --- Tab Switch ---
-  window.__SWITCH_TAB__ = (_t) => {
-      document.querySelectorAll('.tab').forEach(_ => _.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(_ => _.style.display = 'none');
-      document.querySelector(`.tab[onclick="__SWITCH_TAB__('${_t}')"]`).classList.add('active');
-      document.getElementById(`${_t}-tab`).style.display = 'block';
-
-      if (_t === 'history') {
-          document.getElementById('history-search-input').value = '';
-          filterHistory();
-      }
+  window.__SWITCH_TAB__ = (tab) => {
+      document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+      document.querySelector(`.tab[onclick="__SWITCH_TAB__('${tab}')"]`).classList.add('active');
+      document.getElementById(`${tab}-tab`).style.display = 'block';
+      if (tab === 'history') filterHistory();
   };
 
-  // --- Save lookup result to Firestore ---
   async function saveToHistory(data) {
       try {
           await addDoc(collection(db, "lookup_history"), {
@@ -766,127 +749,109 @@
               timestamp: serverTimestamp()
           });
       } catch (err) {
-          console.warn("Could not save to history:", err);
+          console.warn("Save error:", err);
       }
   }
 
-  // --- Load all history from Firestore ---
   async function loadHistory() {
       const container = document.getElementById('history-content');
       try {
           const q = query(collection(db, "lookup_history"), orderBy("timestamp", "desc"), limit(100));
-          const snapshot = await getDocs(q);
+          const snap = await getDocs(q);
           allHistoryData = [];
-          if (snapshot.empty) {
-              container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 20px;">No lookup history yet.</p>`;
+          if (snap.empty) {
+              container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 20px;">No history yet.</p>`;
               return;
           }
-          snapshot.forEach(doc => {
+          snap.forEach(doc => {
               const d = doc.data();
-              const time = d.timestamp ? new Date(d.timestamp.toDate()).toLocaleString() : "Unknown time";
-              allHistoryData.push({ ...d, time });
+              allHistoryData.push({
+                  ...d,
+                  time: d.timestamp ? new Date(d.timestamp.toDate()).toLocaleString() : "Unknown"
+              });
           });
           filterHistory();
       } catch (err) {
           container.innerHTML = `<p style="color: var(--error-text); text-align: center; padding: 20px;">⚠️ Could not load history.</p>`;
-          console.error(err);
       }
   }
 
-  // --- Filter history based on search input ---
-  window.filterHistory = function() {
-      const searchTerm = document.getElementById('history-search-input').value.trim().toLowerCase();
+  window.filterHistory = () => {
+      const term = document.getElementById('history-search-input').value.trim().toLowerCase();
       const container = document.getElementById('history-content');
-      
-      if (allHistoryData.length === 0) return;
-
-      const filtered = allHistoryData.filter(item => 
-          item.gamertag.toLowerCase().includes(searchTerm) ||
-          item.xuid.includes(searchTerm) ||
-          item.hex.toLowerCase().includes(searchTerm) ||
-          item.uuid.toLowerCase().includes(searchTerm)
+      const filtered = allHistoryData.filter(i =>
+          i.gamertag.toLowerCase().includes(term) ||
+          i.xuid.includes(term) ||
+          i.hex.toLowerCase().includes(term) ||
+          i.uuid.toLowerCase().includes(term)
       );
-
-      if (filtered.length === 0) {
-          container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 20px;">No results match your search.</p>`;
+      if (!filtered.length) {
+          container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 20px;">No matches found.</p>`;
           return;
       }
-
-      let html = "";
-      filtered.forEach(item => {
-          html += `
+      container.innerHTML = filtered.map(i => `
           <div class="history-item">
-              <div class="history-time">${item.time}</div>
-              <div class="history-gamertag">${item.gamertag}</div>
-              <div class="history-row">
-                  <span>XUID: ${item.xuid}</span>
-                  <button class="copy-btn" onclick="navigator.clipboard.writeText('${item.xuid}');showCopy('XUID copied!')">Copy</button>
-              </div>
-              <div class="history-row">
-                  <span>Hex: ${item.hex}</span>
-                  <button class="copy-btn" onclick="navigator.clipboard.writeText('${item.hex}');showCopy('Hex copied!')">Copy</button>
-              </div>
-              <div class="history-row">
-                  <span>UUID: ${item.uuid}</span>
-                  <button class="copy-btn" onclick="navigator.clipboard.writeText('${item.uuid}');showCopy('UUID copied!')">Copy</button>
-              </div>
-          </div>`;
-      });
-      container.innerHTML = html;
+              <div class="history-time">${i.time}</div>
+              <div class="history-gamertag">${i.gamertag}</div>
+              <div class="history-row"><span>XUID: ${i.xuid}</span><button class="copy-btn" onclick="navigator.clipboard.writeText('${i.xuid}');showCopy('Copied')">Copy</button></div>
+              <div class="history-row"><span>Hex: ${i.hex}</span><button class="copy-btn" onclick="navigator.clipboard.writeText('${i.hex}');showCopy('Copied')">Copy</button></div>
+              <div class="history-row"><span>UUID: ${i.uuid}</span><button class="copy-btn" onclick="navigator.clipboard.writeText('${i.uuid}');showCopy('Copied')">Copy</button></div>
+          </div>
+      `).join('');
   };
 
-  // --- Lookup Function ---
   window.__LOOKUP__ = async () => {
-      const _gt = document.getElementById('gamertag').value.trim();
-      const _res = document.getElementById('lookup-result');
-      const _txt = document.getElementById('lookup-text');
-      if(!_gt) return _txt.innerHTML = '⚠️ Enter a gamertag', _res.style.display = 'block', _res.className = 'result error';
-      _txt.innerHTML = '🔄 Searching...', _res.style.display = 'block', _res.className = 'result';
+      const gt = document.getElementById('gamertag').value.trim();
+      const res = document.getElementById('lookup-result');
+      const txt = document.getElementById('lookup-text');
+      if (!gt) return txt.textContent = '⚠️ Enter a gamertag', res.style.display = 'block', res.className = 'result error';
+      txt.textContent = '🔄 Searching...', res.style.display = 'block', res.className = 'result';
       try {
-          const _r = await fetch(`https://api.geysermc.org/v2/xbox/xuid/${encodeURIComponent(_gt)}`);
-          const _d = await _r.json();
-          if(_d.xuid) {
-              const _h = BigInt(_d.xuid).toString(16).toUpperCase().padStart(16, '0');
-              const _u = `00000000-0000-0000-${_h.slice(0,4)}-${_h.slice(4)}`.toLowerCase();
-              _txt.innerHTML = `<span class="label">Gamertag</span><div class="value">${_gt}</div>
-              <span class="label">Decimal XUID</span><div class="value">${_d.xuid}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_d.xuid}');showCopy('Copied!')">Copy</button></div>
-              <span class="label">Hex XUID</span><div class="value">${_h}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_h}');showCopy('Copied!')">Copy</button></div>
-              <span class="label">Floodgate UUID</span><div class="value">${_u}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_u}');showCopy('Copied!')">Copy</button></div>`;
-              _res.className = 'result success';
-
-              await saveToHistory({ gamertag: _gt, xuid: _d.xuid, hex: _h, uuid: _u });
+          const r = await fetch(`https://api.geysermc.org/v2/xbox/xuid/${encodeURIComponent(gt)}`);
+          const d = await r.json();
+          if (d.xuid) {
+              const hex = BigInt(d.xuid).toString(16).toUpperCase().padStart(16, '0');
+              const uuid = `00000000-0000-0000-${hex.slice(0,4)}-${hex.slice(4)}`.toLowerCase();
+              txt.innerHTML = `
+                  <span class="label">Gamertag</span><div class="value">${gt}</div>
+                  <span class="label">Decimal XUID</span><div class="value">${d.xuid}<button class="copy-btn" onclick="navigator.clipboard.writeText('${d.xuid}');showCopy('Copied')">Copy</button></div>
+                  <span class="label">Hex XUID</span><div class="value">${hex}<button class="copy-btn" onclick="navigator.clipboard.writeText('${hex}');showCopy('Copied')">Copy</button></div>
+                  <span class="label">Floodgate UUID</span><div class="value">${uuid}<button class="copy-btn" onclick="navigator.clipboard.writeText('${uuid}');showCopy('Copied')">Copy</button></div>
+              `;
+              res.className = 'result success';
+              await saveToHistory({ gamertag: gt, xuid: d.xuid, hex, uuid });
           } else {
-              _txt.innerHTML = '❌ Not found';
-              _res.className = 'result error';
+              txt.textContent = '❌ Gamertag not found';
+              res.className = 'result error';
           }
-      } catch(_) {
-          _txt.innerHTML = '❌ Error connecting to API';
-          _res.className = 'result error';
+      } catch {
+          txt.textContent = '❌ Could not connect to API';
+          res.className = 'result error';
       }
   };
 
-  // --- Converter Function ---
   window.__CONVERT__ = () => {
-      const _dec = document.getElementById('decimal-xuid').value.trim();
-      const _res = document.getElementById('convert-result');
-      const _txt = document.getElementById('convert-text');
-      if(!/^\d+$/.test(_dec)) return _txt.innerHTML = '⚠️ Enter valid decimal', _res.style.display = 'block', _res.className = 'result error';
+      const dec = document.getElementById('decimal-xuid').value.trim();
+      const res = document.getElementById('convert-result');
+      const txt = document.getElementById('convert-text');
+      if (!/^\d+$/.test(dec)) return txt.textContent = '⚠️ Enter a valid decimal number', res.style.display = 'block', res.className = 'result error';
       try {
-          const _h = BigInt(_dec).toString(16).toUpperCase().padStart(16, '0');
-          const _u = `00000000-0000-0000-${_h.slice(0,4)}-${_h.slice(4)}`.toLowerCase();
-          _txt.innerHTML = `<span class="label">Decimal XUID</span><div class="value">${_dec}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_dec}');showCopy('Copied!')">Copy</button></div>
-          <span class="label">Hex XUID</span><div class="value">${_h}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_h}');showCopy('Copied!')">Copy</button></div>
-          <span class="label">Floodgate UUID</span><div class="value">${_u}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_u}');showCopy('Copied!')">Copy</button></div>`;
-          _res.style.display = 'block';
-          _res.className = 'result success';
-      } catch(_) {
-          _txt.innerHTML = '❌ Invalid number';
-          _res.className = 'result error';
+          const hex = BigInt(dec).toString(16).toUpperCase().padStart(16, '0');
+          const uuid = `00000000-0000-0000-${hex.slice(0,4)}-${hex.slice(4)}`.toLowerCase();
+          txt.innerHTML = `
+              <span class="label">Decimal XUID</span><div class="value">${dec}<button class="copy-btn" onclick="navigator.clipboard.writeText('${dec}');showCopy('Copied')">Copy</button></div>
+              <span class="label">Hex XUID</span><div class="value">${hex}<button class="copy-btn" onclick="navigator.clipboard.writeText('${hex}');showCopy('Copied')">Copy</button></div>
+              <span class="label">Floodgate UUID</span><div class="value">${uuid}<button class="copy-btn" onclick="navigator.clipboard.writeText('${uuid}');showCopy('Copied')">Copy</button></div>
+          `;
+          res.style.display = 'block';
+          res.className = 'result success';
+      } catch {
+          txt.textContent = '❌ Invalid number';
+          res.className = 'result error';
       }
   };
 
-  // --- Helper Functions ---
-  window.showCopy = function(text) {
+  window.showCopy = (text) => {
       const el = document.getElementById('copyNotification');
       el.textContent = text;
       el.classList.remove('error');
@@ -900,16 +865,16 @@
       document.getElementById('gamertag').addEventListener('keydown', e => e.key === 'Enter' && __LOOKUP__());
       document.getElementById('decimal-xuid').addEventListener('keydown', e => e.key === 'Enter' && __CONVERT__());
 
-      const _theme = document.getElementById('themeToggle');
+      const themeBtn = document.getElementById('themeToggle');
       if(localStorage.getItem('theme') === 'dark' || window.matchMedia('(prefers-color-scheme: dark)').matches) {
           document.body.classList.add('dark-mode');
-          _theme.textContent = '☀️ Light Mode';
+          themeBtn.textContent = '☀️ Light Mode';
       }
-      _theme.addEventListener('click', () => {
+      themeBtn.addEventListener('click', () => {
           document.body.classList.toggle('dark-mode');
-          const _is = document.body.classList.contains('dark-mode');
-          _theme.textContent = _is ? '☀️ Light Mode' : '🌙 Dark Mode';
-          localStorage.setItem('theme', _is ? 'dark' : 'light');
+          const isDark = document.body.classList.contains('dark-mode');
+          themeBtn.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+          localStorage.setItem('theme', isDark ? 'dark' : 'light');
       });
   });
 </script>
