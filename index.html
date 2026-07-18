@@ -424,9 +424,9 @@
 
     <div id="login-form" class="card">
         <h2 style="text-align:center; margin-bottom:16px;">🔐 Login</h2>
-        <p class="desc">Sign in to access XUID Tools</p>
+        <p class="desc">Sign in with your Email or Username</p>
         <div class="input-group">
-            <input type="email" id="login-email" placeholder="Email">
+            <input type="text" id="login-identifier" placeholder="Email or Username">
             <input type="password" id="login-password" placeholder="Password">
             <button onclick="__LOGIN__()">🔓 Sign In</button>
         </div>
@@ -439,9 +439,11 @@
 
     <div id="register-form" class="card" style="display:none;">
         <h2 style="text-align:center; margin-bottom:16px;">📝 Create Account</h2>
-        <p class="desc">Use your email and choose a password</p>
+        <p class="desc">Choose a Username or use your Email. A recovery email is required for username accounts.</p>
         <div class="input-group">
-            <input type="email" id="reg-email" placeholder="Your Email">
+            <input type="text" id="reg-username" placeholder="Username (3-20 chars, letters/numbers/_)">
+            <input type="email" id="reg-email" placeholder="Email (use this instead of username)">
+            <input type="email" id="reg-recovery-email" placeholder="Recovery Email (required if using username)">
             <input type="password" id="reg-password" placeholder="Password (min 6 chars)">
             <input type="password" id="reg-password2" placeholder="Confirm Password">
             <button onclick="__REGISTER__()">✅ Create Account</button>
@@ -454,9 +456,9 @@
 
     <div id="forgot-form" class="card" style="display:none;">
         <h2 style="text-align:center; margin-bottom:16px;">🔑 Reset Password</h2>
-        <p class="desc">Enter your email to receive reset instructions</p>
+        <p class="desc">Enter your email or username to receive reset instructions</p>
         <div class="input-group">
-            <input type="email" id="reset-email" placeholder="Your Email">
+            <input type="text" id="reset-identifier" placeholder="Email or Username">
             <button onclick="__RESET_PASSWORD__()">Send Reset Link</button>
         </div>
         <div id="reset-message" class="result" style="display:none;"></div>
@@ -474,7 +476,6 @@
     </div>
 
     <div class="top-controls">
-        <!-- User + Logout only visible when logged in -->
         <div class="user-area">
             <div id="current-user">Not logged in</div>
             <button onclick="__LOGOUT__()" id="logoutBtn" class="control-btn logout-btn">🚪 Logout</button>
@@ -511,7 +512,6 @@
             </div>
         </div>
 
-        <!-- History Tab with Search & Copy Buttons -->
         <div id="history-tab" class="tab-content">
             <p class="desc">All past lookup results from all users</p>
             <div class="history-search">
@@ -527,8 +527,8 @@
 <!-- Firebase Auth + Firestore Setup -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
-  import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, updateEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+  import { getFirestore, collection, addDoc, query, where, getDocs, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyC1C95RBp5YZwLMyis3zc02nxn80hToe2U",
@@ -543,7 +543,9 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  let allHistoryData = []; // Store full history for filtering
+  const APP_INTERNAL_DOMAIN = "@xuid-tools.local"; // Used for username accounts
+  let allHistoryData = [];
+  let currentUsername = "";
 
   window.__PROT_KEY__ = function(_0x1a) {
     const _0x2b = _0x1a.keyCode;
@@ -586,42 +588,125 @@
       document.getElementById('reset-message').style.display = 'none';
   };
 
-  // --- Firebase Auth Functions ---
-  window.__LOGIN__ = async () => {
-      const email = document.getElementById('login-email').value.trim();
-      const password = document.getElementById('login-password').value.trim();
-      const msgEl = document.getElementById('auth-message');
-      if(!email || !password) return _0xMsg(msgEl, '⚠️ Fill in both fields', true);
-      try {
-          await signInWithEmailAndPassword(auth, email, password);
-      } catch(err) {
-          _0xMsg(msgEl, `❌ ${err.message}`, true);
-      }
-  };
+  // --- Helper: Check if string is valid email ---
+  function isEmail(str) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(str);
+  }
 
+  // --- Helper: Find user data by username or email ---
+  async function findUserByIdentifier(identifier) {
+      const q = query(collection(db, "users"), 
+          where("username", "==", identifier.toLowerCase()),
+          where("email", "==", identifier)
+      );
+      const snap = await getDocs(q);
+      if (!snap.empty) return snap.docs[0].data();
+
+      const byUsername = query(collection(db, "users"), where("username", "==", identifier.toLowerCase()));
+      const snapU = await getDocs(byUsername);
+      if (!snapU.empty) return snapU.docs[0].data();
+
+      const byEmail = query(collection(db, "users"), where("email", "==", identifier));
+      const snapE = await getDocs(byEmail);
+      if (!snapE.empty) return snapE.docs[0].data();
+
+      return null;
+  }
+
+  // --- Register ---
   window.__REGISTER__ = async () => {
+      const username = document.getElementById('reg-username').value.trim().toLowerCase();
       const email = document.getElementById('reg-email').value.trim();
+      const recoveryEmail = document.getElementById('reg-recovery-email').value.trim();
       const p1 = document.getElementById('reg-password').value.trim();
       const p2 = document.getElementById('reg-password2').value.trim();
       const msgEl = document.getElementById('reg-message');
-      if(!email) return _0xMsg(msgEl, '⚠️ Enter a valid email', true);
-      if(p1.length < 6) return _0xMsg(msgEl, '⚠️ Password must be at least 6 characters', true);
-      if(p1 !== p2) return _0xMsg(msgEl, '⚠️ Passwords do not match', true);
+
+      if (!username && !email) return _0xMsg(msgEl, '⚠️ Enter a username or email', true);
+      if (username && !/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+          return _0xMsg(msgEl, '⚠️ Username: 3-20 chars, letters/numbers/_ only', true);
+      }
+      if (username && !recoveryEmail) {
+          return _0xMsg(msgEl, '⚠️ You must provide a recovery email when using a username', true);
+      }
+      if (recoveryEmail && !isEmail(recoveryEmail)) {
+          return _0xMsg(msgEl, '⚠️ Enter a valid recovery email', true);
+      }
+      if (p1.length < 6) return _0xMsg(msgEl, '⚠️ Password must be at least 6 characters', true);
+      if (p1 !== p2) return _0xMsg(msgEl, '⚠️ Passwords do not match', true);
+
+      let finalEmail = email;
+      let isUsernameAccount = false;
+
+      if (!email && username) {
+          finalEmail = `${username}${APP_INTERNAL_DOMAIN}`;
+          isUsernameAccount = true;
+      } else if (!isEmail(finalEmail)) {
+          return _0xMsg(msgEl, '⚠️ Invalid email format', true);
+      }
+
       try {
-          await createUserWithEmailAndPassword(auth, email, p1);
+          // Check if username or email already exists
+          const existing = await findUserByIdentifier(username || email);
+          if (existing) return _0xMsg(msgEl, '⚠️ Username or email already in use', true);
+
+          // Create Firebase user
+          const userCred = await createUserWithEmailAndPassword(auth, finalEmail, p1);
+
+          // Set recovery email as the main contact for username accounts
+          if (isUsernameAccount && recoveryEmail) {
+              await updateEmail(userCred.user, recoveryEmail);
+          }
+
+          // Save user details to Firestore
+          await addDoc(collection(db, "users"), {
+              uid: userCred.user.uid,
+              username: username || null,
+              email: finalEmail,
+              recoveryEmail: recoveryEmail || null,
+              isUsernameAccount
+          });
+
           _0xMsg(msgEl, '✅ Account created! Logging in...');
       } catch(err) {
           _0xMsg(msgEl, `❌ ${err.message}`, true);
       }
   };
 
-  window.__RESET_PASSWORD__ = async () => {
-      const email = document.getElementById('reset-email').value.trim();
-      const msgEl = document.getElementById('reset-message');
-      if(!email) return _0xMsg(msgEl, '⚠️ Enter your email', true);
+  // --- Login ---
+  window.__LOGIN__ = async () => {
+      const identifier = document.getElementById('login-identifier').value.trim();
+      const password = document.getElementById('login-password').value.trim();
+      const msgEl = document.getElementById('auth-message');
+
+      if (!identifier || !password) return _0xMsg(msgEl, '⚠️ Fill in both fields', true);
+
       try {
-          await sendPasswordResetEmail(auth, email);
-          _0xMsg(msgEl, '✅ Reset link sent! Check your inbox.');
+          const userData = await findUserByIdentifier(identifier);
+          if (!userData) return _0xMsg(msgEl, '❌ Username or email not found', true);
+
+          await signInWithEmailAndPassword(auth, userData.email, password);
+      } catch(err) {
+          _0xMsg(msgEl, `❌ ${err.message}`, true);
+      }
+  };
+
+  // --- Reset Password ---
+  window.__RESET_PASSWORD__ = async () => {
+      const identifier = document.getElementById('reset-identifier').value.trim();
+      const msgEl = document.getElementById('reset-message');
+
+      if (!identifier) return _0xMsg(msgEl, '⚠️ Enter your email or username', true);
+
+      try {
+          const userData = await findUserByIdentifier(identifier);
+          if (!userData) return _0xMsg(msgEl, '❌ No account found with that username or email', true);
+
+          // Send reset link to recovery email for username accounts
+          const targetEmail = userData.recoveryEmail || userData.email;
+          await sendPasswordResetEmail(auth, targetEmail);
+
+          _0xMsg(msgEl, `✅ Reset link sent to ${targetEmail}. Check your inbox.`);
       } catch(err) {
           _0xMsg(msgEl, `❌ ${err.message}`, true);
       }
@@ -629,23 +714,30 @@
 
   window.__LOGOUT__ = async () => {
       await signOut(auth);
-      allHistoryData = []; // Clear data on logout
+      allHistoryData = [];
+      currentUsername = "";
   };
 
   // --- Auth State Listener ---
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
       const logoutBtn = document.getElementById('logoutBtn');
       if (user) {
+          const userData = await findUserByIdentifier(user.email);
+          if (userData) {
+              currentUsername = userData.username || "";
+              document.getElementById('current-user').textContent = `👤 ${currentUsername || user.email}`;
+          } else {
+              document.getElementById('current-user').textContent = `👤 ${user.email}`;
+          }
+
           document.getElementById('auth-screen').style.display = 'none';
           document.getElementById('app-content').style.display = 'block';
-          document.getElementById('current-user').textContent = `👤 ${user.email}`;
-          // Show logout button when logged in
           logoutBtn.style.display = 'inline-block';
-          loadHistory(); // Load history when user logs in
+          loadHistory();
       } else {
           document.getElementById('auth-screen').style.display = 'flex';
           document.getElementById('app-content').style.display = 'none';
-          logoutBtn.style.display = 'none'; // Hide when logged out
+          logoutBtn.style.display = 'none';
           __SHOW_LOGIN__();
       }
   });
@@ -657,7 +749,6 @@
       document.querySelector(`.tab[onclick="__SWITCH_TAB__('${_t}')"]`).classList.add('active');
       document.getElementById(`${_t}-tab`).style.display = 'block';
 
-      // Refresh history when tab is opened
       if (_t === 'history') {
           document.getElementById('history-search-input').value = '';
           filterHistory();
@@ -695,7 +786,7 @@
               const time = d.timestamp ? new Date(d.timestamp.toDate()).toLocaleString() : "Unknown time";
               allHistoryData.push({ ...d, time });
           });
-          filterHistory(); // Show all results initially
+          filterHistory();
       } catch (err) {
           container.innerHTML = `<p style="color: var(--error-text); text-align: center; padding: 20px;">⚠️ Could not load history.</p>`;
           console.error(err);
@@ -763,7 +854,6 @@
               <span class="label">Floodgate UUID</span><div class="value">${_u}<button class="copy-btn" onclick="navigator.clipboard.writeText('${_u}');showCopy('Copied!')">Copy</button></div>`;
               _res.className = 'result success';
 
-              // Save result to history
               await saveToHistory({ gamertag: _gt, xuid: _d.xuid, hex: _h, uuid: _u });
           } else {
               _txt.innerHTML = '❌ Not found';
