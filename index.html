@@ -59,9 +59,14 @@
             color: var(--text);
             min-height: 100vh;
             padding: 20px 16px;
-            max-width: 100%;
-            top: 0 !important;
             position: relative;
+        }
+
+        .logo {
+            max-width: 120px;
+            height: auto;
+            display: block;
+            margin: 0 auto 24px;
         }
 
         h1 {
@@ -144,16 +149,6 @@
             opacity: 0.85;
         }
 
-        .goog-te-banner-frame,
-        .goog-te-menu-frame,
-        .goog-te-menu-value span:first-child,
-        #google_translate_element {
-            display: none !important;
-            visibility: hidden !important;
-            height: 0 !important;
-            width: 0 !important;
-        }
-
         .card {
             background: var(--card);
             border-radius: 16px;
@@ -211,7 +206,7 @@
         }
 
         input {
-            width:  100%;
+            width: 100%;
             padding: 14px 16px;
             background: var(--input-bg);
             border: 1px solid var(--border);
@@ -391,15 +386,11 @@
 </head>
 <body oncontextmenu="return false;" onkeydown="return __PROT_KEY__(event);">
 
-<div id="google_translate_element"></div>
 <div id="copyNotification" class="copy-notification"></div>
 
 <div id="auth-screen">
-    <div style="text-align: center">
-        <a href="link">
-            <img src="https://cdn.discordapp.com/icons/1353430789806751855/c196ff4cec0bbbb5b21fed72db83e895.png" alt="Logo" align="center">
-        </a>
-    </div>
+    <!-- ✅ Fixed logo display -->
+    <img src="https://cdn.discordapp.com/icons/1353430789806751855/c196ff4cec0bbbb5b21fed72db83e895.png" alt="Logo" class="logo">
 
     <div id="login-form" class="card">
         <h2 style="text-align:center; margin-bottom:16px;">🔐 Login</h2>
@@ -448,11 +439,8 @@
 </div>
 
 <div id="app-content">
-    <div style="text-align: center">
-        <a href="link">
-            <img src="https://cdn.discordapp.com/icons/1353430789806751855/c196ff4cec0bbbb5b21fed72db83e895.png" alt="Logo" align="center">
-        </a>
-    </div>
+    <!-- ✅ Fixed logo display -->
+    <img src="https://cdn.discordapp.com/icons/1353430789806751855/c196ff4cec0bbbb5b21fed72db83e895.png" alt="Logo" class="logo">
 
     <div class="top-controls">
         <div class="user-area">
@@ -503,11 +491,11 @@
     </div>
 </div>
 
-<!-- Firebase Auth + Firestore Setup -->
+<!-- Firebase Setup -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
-  import { getFirestore, collection, addDoc, query, where, getDocs, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, collection, addDoc, query, where, getDocs, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyC1C95RBp5YZwLMyis3zc02nxn80hToe2U",
@@ -564,12 +552,10 @@
       document.getElementById('reset-message').style.display = 'none';
   };
 
-  // --- Check if string is valid email ---
   function isEmail(str) {
       return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(str.trim());
   }
 
-  // --- Find user: first by username, then by email ---
   async function findUserByIdentifier(identifier) {
       const id = identifier.trim().toLowerCase();
       let q = query(collection(db, "users"), where("username", "==", id));
@@ -583,7 +569,7 @@
       return null;
   }
 
-  // --- Register ---
+  // ✅ Fixed Register
   window.__REGISTER__ = async () => {
       const username = document.getElementById('reg-username').value.trim().toLowerCase();
       const email = document.getElementById('reg-email').value.trim().toLowerCase();
@@ -592,7 +578,6 @@
       const p2 = document.getElementById('reg-password2').value.trim();
       const msgEl = document.getElementById('reg-message');
 
-      // Validation
       if (!username && !email) return _0xMsg(msgEl, '⚠️ Enter a username OR email', true);
       if (username && email) return _0xMsg(msgEl, '⚠️ Use only one option — not both', true);
       if (username && !/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
@@ -611,39 +596,36 @@
       if (p1 !== p2) return _0xMsg(msgEl, '⚠️ Passwords do not match', true);
 
       try {
-          // Check duplicates
           const existing = await findUserByIdentifier(username || email);
           if (existing) return _0xMsg(msgEl, '⚠️ Username or email already taken', true);
 
-          let finalAuthEmail = email;
+          let authEmail = email;
           let isUsernameAccount = false;
 
           if (username) {
-              finalAuthEmail = `${username}${APP_INTERNAL_DOMAIN}`;
+              authEmail = `${username}${APP_INTERNAL_DOMAIN}`;
               isUsernameAccount = true;
           }
 
-          // Create Firebase user
-          const userCred = await createUserWithEmailAndPassword(auth, finalAuthEmail, p1);
+          const userCred = await createUserWithEmailAndPassword(auth, authEmail, p1);
 
-          // Save data to Firestore
           await addDoc(collection(db, "users"), {
               uid: userCred.user.uid,
               username: username || null,
-              email: finalAuthEmail,
+              email: authEmail,
               recoveryEmail: isUsernameAccount ? recoveryEmail : null,
               isUsernameAccount
           });
 
-          _0xMsg(msgEl, '✅ Account created! You can log in now.', false);
+          _0xMsg(msgEl, '✅ Account created successfully! You can log in now.', false);
 
       } catch (err) {
           console.error(err);
-          _0xMsg(msgEl, `❌ ${err.message.replace("Firebase: ", "")}`, true);
+          _0xMsg(msgEl, `❌ ${err.message.replace("Firebase: ", "").replace("(auth/", "").replace(")", "")}`, true);
       }
   };
 
-  // --- Login ---
+  // ✅ Fixed Login
   window.__LOGIN__ = async () => {
       const identifier = document.getElementById('login-identifier').value.trim();
       const password = document.getElementById('login-password').value.trim();
@@ -653,17 +635,16 @@
 
       try {
           const userData = await findUserByIdentifier(identifier);
-          if (!userData) return _0xMsg(msgEl, '❌ Username or email not found', true);
+          if (!userData) return _0xMsg(msgEl, '❌ Account not found', true);
 
-          // ✅ Fixed: use correct login email for both account types
           await signInWithEmailAndPassword(auth, userData.email, password);
 
       } catch (err) {
-          _0xMsg(msgEl, `❌ ${err.message.replace("Firebase: ", "")}`, true);
+          console.error(err);
+          _0xMsg(msgEl, `❌ ${err.message.replace("Firebase: ", "").replace("(auth/", "").replace(")", "")}`, true);
       }
   };
 
-  // --- Reset Password ---
   window.__RESET_PASSWORD__ = async () => {
       const identifier = document.getElementById('reset-identifier').value.trim();
       const msgEl = document.getElementById('reset-message');
@@ -674,12 +655,12 @@
           const userData = await findUserByIdentifier(identifier);
           if (!userData) return _0xMsg(msgEl, '❌ No account found', true);
 
-          const targetEmail = userData.recoveryEmail || userData.email;
-          await sendPasswordResetEmail(auth, targetEmail);
+          const sendTo = userData.recoveryEmail || userData.email;
+          await sendPasswordResetEmail(auth, sendTo);
 
-          _0xMsg(msgEl, `✅ Reset link sent to: ${targetEmail}`, false);
+          _0xMsg(msgEl, `✅ Reset link sent to: ${sendTo}`, false);
       } catch (err) {
-          _0xMsg(msgEl, `❌ ${err.message.replace("Firebase: ", "")}`, true);
+          _0xMsg(msgEl, `❌ ${err.message.replace("Firebase: ", "").replace("(auth/", "").replace(")", "")}`, true);
       }
   };
 
@@ -689,7 +670,6 @@
       __SHOW_LOGIN__();
   };
 
-  // --- Auth State Listener ---
   onAuthStateChanged(auth, async (user) => {
       const logoutBtn = document.getElementById('logoutBtn');
       if (user) {
