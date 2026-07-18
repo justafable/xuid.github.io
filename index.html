@@ -144,17 +144,6 @@
             opacity: 0.85;
         }
 
-        .reset-lang-btn {
-            padding: 4px 8px;
-            font-size: 0.75rem;
-            opacity: 0.65;
-            transition: opacity 0.2s;
-        }
-
-        .reset-lang-btn:hover {
-            opacity: 1;
-        }
-
         .goog-te-banner-frame,
         .goog-te-menu-frame,
         .goog-te-menu-value span:first-child,
@@ -222,7 +211,7 @@
         }
 
         input {
-            width: 100%;
+            width:  100%;
             padding: 14px 16px;
             background: var(--input-bg);
             border: 1px solid var(--border);
@@ -279,13 +268,6 @@
             background: var(--error-bg);
             border: 1px solid var(--error-border);
             color: var(--error-text);
-        }
-
-        .note {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-top: 12px;
-            line-height: 1.5;
         }
 
         .label {
@@ -436,7 +418,7 @@
 
     <div id="register-form" class="card" style="display:none;">
         <h2 style="text-align:center; margin-bottom:16px;">📝 Create Account</h2>
-        <p class="desc">Choose a Username OR use your Email. Recovery email required for usernames.</p>
+        <p class="desc">Choose one: <strong>Username + Recovery Email</strong> OR <strong>Email only</strong></p>
         <div class="input-group">
             <input type="text" id="reg-username" placeholder="Username (3-20 chars, letters/numbers/_)">
             <input type="email" id="reg-email" placeholder="Email (use this instead of username)">
@@ -524,7 +506,7 @@
 <!-- Firebase Auth + Firestore Setup -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, updateEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
   import { getFirestore, collection, addDoc, query, where, getDocs, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -587,7 +569,7 @@
       return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(str.trim());
   }
 
-  // --- Find user: first try by username, then by email ---
+  // --- Find user: first by username, then by email ---
   async function findUserByIdentifier(identifier) {
       const id = identifier.trim().toLowerCase();
       let q = query(collection(db, "users"), where("username", "==", id));
@@ -610,14 +592,14 @@
       const p2 = document.getElementById('reg-password2').value.trim();
       const msgEl = document.getElementById('reg-message');
 
-      // Basic validation
+      // Validation
       if (!username && !email) return _0xMsg(msgEl, '⚠️ Enter a username OR email', true);
-      if (username && email) return _0xMsg(msgEl, '⚠️ Use only username OR only email, not both', true);
+      if (username && email) return _0xMsg(msgEl, '⚠️ Use only one option — not both', true);
       if (username && !/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
           return _0xMsg(msgEl, '⚠️ Username: 3-20 chars, letters/numbers/_ only', true);
       }
       if (username && !recoveryEmail) {
-          return _0xMsg(msgEl, '⚠️ Recovery email is required when using username', true);
+          return _0xMsg(msgEl, '⚠️ Recovery email is required for username accounts', true);
       }
       if (recoveryEmail && !isEmail(recoveryEmail)) {
           return _0xMsg(msgEl, '⚠️ Enter a valid recovery email', true);
@@ -629,36 +611,31 @@
       if (p1 !== p2) return _0xMsg(msgEl, '⚠️ Passwords do not match', true);
 
       try {
-          // Check for duplicate
+          // Check duplicates
           const existing = await findUserByIdentifier(username || email);
           if (existing) return _0xMsg(msgEl, '⚠️ Username or email already taken', true);
 
-          let finalEmail = email;
+          let finalAuthEmail = email;
           let isUsernameAccount = false;
 
           if (username) {
-              finalEmail = `${username}${APP_INTERNAL_DOMAIN}`;
+              finalAuthEmail = `${username}${APP_INTERNAL_DOMAIN}`;
               isUsernameAccount = true;
           }
 
-          // Create Firebase Auth user
-          const userCred = await createUserWithEmailAndPassword(auth, finalEmail, p1);
+          // Create Firebase user
+          const userCred = await createUserWithEmailAndPassword(auth, finalAuthEmail, p1);
 
-          // Update to real recovery email for username accounts
-          if (isUsernameAccount) {
-              await updateEmail(userCred.user, recoveryEmail);
-          }
-
-          // Save to Firestore
+          // Save data to Firestore
           await addDoc(collection(db, "users"), {
               uid: userCred.user.uid,
               username: username || null,
-              email: finalEmail,
-              recoveryEmail: recoveryEmail || null,
+              email: finalAuthEmail,
+              recoveryEmail: isUsernameAccount ? recoveryEmail : null,
               isUsernameAccount
           });
 
-          _0xMsg(msgEl, '✅ Account created! Logging you in...', false);
+          _0xMsg(msgEl, '✅ Account created! You can log in now.', false);
 
       } catch (err) {
           console.error(err);
@@ -678,7 +655,9 @@
           const userData = await findUserByIdentifier(identifier);
           if (!userData) return _0xMsg(msgEl, '❌ Username or email not found', true);
 
-          await signInWithEmailAndPassword(auth, userData.isUsernameAccount ? userData.recoveryEmail : userData.email, password);
+          // ✅ Fixed: use correct login email for both account types
+          await signInWithEmailAndPassword(auth, userData.email, password);
+
       } catch (err) {
           _0xMsg(msgEl, `❌ ${err.message.replace("Firebase: ", "")}`, true);
       }
